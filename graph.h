@@ -22,6 +22,9 @@ public:
     int getY(){return y;}
     int getX(){return x;}
     int getID(){return id;}
+    std::vector<Edge> getEdges(){
+        return out_edges;
+    }
 
     friend class Graph;
     friend class Edge;
@@ -42,11 +45,15 @@ public:
     bool operator<= (const Edge &other_edge) const;
     Edge(Vertex &t_from, Vertex &t_to) : from(t_from.id), to(t_to.id), weight(calculateWeight(t_from, t_to)){}
     Edge(int &t_from, int &t_to, int &t_weight) : from(t_from), to(t_to) , weight(t_weight) {}
-    int calculateWeight(Vertex &t_from, Vertex &t_to);
+    int getWeight(){
+        return weight;
+    }
+
     friend class Graph;
     friend class Vertex;
 
 protected:
+    int calculateWeight(Vertex &t_from, Vertex &t_to);
     int from;
     int to;
     int weight;

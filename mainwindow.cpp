@@ -55,8 +55,8 @@ void MainWindow::makePlot(){
     drawPoints(ui->customPlot, vertices);
 
     // set axes ranges, so we see all data:
-    ui->customPlot->xAxis->setRange(0, max_x);
-    ui->customPlot->yAxis->setRange(0, max_y);
+    ui->customPlot->xAxis->setRange(0, max_x+250);
+    ui->customPlot->yAxis->setRange(0, max_y+250);
     ui->customPlot->replot();
 }
 
