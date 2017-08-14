@@ -1,18 +1,18 @@
-#ifndef TSP_ALGO_NEAREST_NEIGHBOR_H
-#define TSP_ALGO_NEAREST_NEIGHBOR_H
+#ifndef TSP_Algo_Genetic_H
+#define TSP_Algo_Genetic_H
 #include "graph.h"
 
-class TSP_Algo_Nearest_Neighbor
+class TSP_Algo_Genetic
 {
 public:
-    TSP_Algo_Nearest_Neighbor(std::string &file_name) : m_graph(file_name){
+    TSP_Algo_Genetic(std::string &file_name) : m_graph(file_name){
         m_min_spanning_tree = m_graph.primMST();
         m_vertices = new vector<Vertex>(m_graph.getVertices());
     }
 
     int getCurrentFitness() const;
 
-    vector<Vertex>* getRoute();
+    vector<Edge> getRoute();
     void tick();
 
 private:
@@ -26,4 +26,4 @@ private:
 
 };
 
-#endif // TSP_ALGO_NEAREST_NEIGHBOR_H
+#endif // TSP_algo_genetic_H
