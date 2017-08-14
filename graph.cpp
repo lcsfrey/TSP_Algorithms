@@ -3,6 +3,12 @@
 // Graph Implementations
 Graph::Graph(std::string file_name){
     readFromFile(file_name);
+    printf("Total vertices: %d\n", this->size);
+}
+
+void Graph::addVertex(int &t_vertex_id, int &t_vertex_x, int &t_vertex_y){
+    Vertex t_vertex(t_vertex_x, t_vertex_y, t_vertex_id);
+    addVertex(t_vertex);
 }
 
 void Graph::addVertex(Vertex &t_vertex){
@@ -16,14 +22,18 @@ void Graph::addVertex(Vertex &t_vertex){
     }
 }
 
+void Graph::addVertices(vector<Vertex> &t_vertices){
+    for(auto t_vertex : t_vertices){
+        addVertex(t_vertex);
+    }
+}
+
 void Graph::printOrderedEdges(Vertex &t_vertex){
     priority_queue<Edge, std::vector<Edge>, std::greater<Edge>> t_queue(t_vertex.out_edge_heap);
     while(t_queue.size() > 0){
         Edge t_edge = t_queue.top();
         t_queue.pop();
-        cout << "From: " << t_edge.from << endl;
-        cout << "To: " << t_edge.to << endl;
-        cout << "Weight: " << t_edge.weight << endl << endl;
+            cout << t_edge.from  << " <---"<< t_edge.weight << "--->" << t_edge.to << endl;
     }
 }
 
@@ -36,15 +46,16 @@ vector<Vertex> Graph::getVertices(){
 }
 
 vector<int> Graph::primMST(){
+    printf("Calculating minimum spanning tree...\n");
+    auto start = std::chrono::high_resolution_clock::now();
 
+    vector<bool> inMST(size, false);
     struct Order{
         bool operator()(Edge* t_edge1, Edge* t_edge2){
             return *t_edge1 > *t_edge2;
         }
     };
     priority_queue<Edge*, std::vector<Edge*>, Order> t_queue;
-
-    vector<bool> inMST(size, false);
     vector<int> key(m_vertices.size(), INT32_MAX);
     vector<int> parent(m_vertices.size(), -1);
     key[0] = 0;
@@ -54,7 +65,7 @@ vector<int> Graph::primMST(){
         Edge *t_vertex = t_queue.top();
         t_queue.pop();
         inMST[t_vertex->to] = true;
-        for(Edge t_edge : m_vertices[t_vertex->to].out_edges){
+        for(auto t_edge : m_vertices[t_vertex->to].out_edges){
             if(inMST[t_edge.to] == false && t_edge.weight < key[t_edge.to]){
                 key[t_edge.to] = t_edge.weight;
                 t_queue.push(&m_vertices[t_vertex->to].out_edges[t_edge.to]);
@@ -62,8 +73,9 @@ vector<int> Graph::primMST(){
             }
         }
     }
-    for (int i = 1; i < size; ++i)
-        printf("%d - %d\n", parent[i], i);
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = finish - start;
+    printf("MST took: %f\n", elapsed.count());
     return parent;
 }
 
@@ -98,6 +110,7 @@ void Vertex::addEdge(Vertex &other_vertex){
     }
 }
 
+
 bool Vertex::operator> (const Vertex &other_vertex) const{
     return (this->out_edge_heap.top() > other_vertex.out_edge_heap.top());
 }
@@ -120,7 +133,8 @@ int Edge::calculateWeight(Vertex &t_from, Vertex &t_to){
         // FUNCTION CURRENTLY ONLY ROUNDS DOWN
         // TODO: MAKE FUNCTION ROUND UP OR DOWN
         if(t_from.id != t_to.id){
-            t_weight = sqrt(pow((t_from.y - t_to.y), 2) + pow((t_from.x - t_to.x), 2));
+            float t_number = sqrt(pow((t_from.y - t_to.y), 2) + pow((t_from.x - t_to.x), 2));
+            t_weight = round(t_number);
         }
         else if(t_from.id == t_to.id){
             t_weight = 0;
