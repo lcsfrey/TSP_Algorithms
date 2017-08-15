@@ -3,30 +3,29 @@
 #include "graph.h"
 #include <algorithm>
 #include <string>
+#include <fstream>
 
 
 class TSP_Algo_Nearest_Neighbors
 {
 public:
     TSP_Algo_Nearest_Neighbors(Graph* t_graph) : m_graph(t_graph){
-        m_min_spanning_tree = m_graph->primMST();
-        m_vertices =vector<Vertex>(m_graph->getVertices());
+        m_vertices = m_graph->getVertices();
     }
 
     void findPath();
-    void storePath();
+    void twoOpt(chrono::system_clock::time_point time_overall_start = std::chrono::high_resolution_clock::now());
     std::vector<int> getRoute();
-    void twoOpt();
     int getRouteLength();
+    void writeToFile(std::string file_name);
+
 
 private:
-    vector<int> twoOptSwap(vector<int> &t_route, int start, int end, int &size);
-    int calcPathLength(vector<int>& t_path, int size);
+    int calcPathLength(vector<int>& t_route);
     int m_route_length = 0;
     vector<Vertex> m_vertices;
     vector<Edge> m_route;
-    vector<int> m_simple_path;
-    vector<int> m_min_spanning_tree;
+    vector<int> m_simple_route;
     Graph *m_graph;
 
 };
