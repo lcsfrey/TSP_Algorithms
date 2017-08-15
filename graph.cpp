@@ -6,6 +6,13 @@ Graph::Graph(std::string file_name){
     printf("Total vertices: %d\n", this->size);
 }
 
+Graph::Graph(std::vector<pair<int, int> > &coords){
+    int size = coords.size();
+    for(int i = 0; i < size; i++){
+        addVertex(i, coords[i].first, coords[i].second);
+    }
+}
+
 void Graph::addVertex(int &t_vertex_id, int &t_vertex_x, int &t_vertex_y){
     Vertex t_vertex(t_vertex_x, t_vertex_y, t_vertex_id);
     addVertex(t_vertex);
@@ -75,7 +82,7 @@ vector<int> Graph::primMST(){
     }
     auto finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = finish - start;
-    printf("MST took: %f\n", elapsed.count());
+    printf("Minimum spanning tree took: %f seconds\n----------------------------------------\n", elapsed.count());
     return parent;
 }
 

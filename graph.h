@@ -69,6 +69,7 @@ class Graph
 public:
     Graph();
     Graph(std::string file_name);
+    Graph(std::vector<pair<int, int> > &coords);
     void readFromFile(std::string file_name);
     void addVertex(int &t_vertex_id, int &t_vertex_x, int &t_vertex_y);
     void addVertex(Vertex &t_vertex);
