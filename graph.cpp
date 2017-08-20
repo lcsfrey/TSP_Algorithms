@@ -1,9 +1,9 @@
 #include "graph.h"
 
 // Graph Implementations
-Graph::Graph(std::string file_name){
+Graph::Graph(string &file_name){
     readFromFile(file_name);
-    printf("Total vertices: %d\n", this->size);
+    m_vertices.shrink_to_fit();
 }
 
 Graph::Graph(std::vector<pair<int, int> > &coords){
@@ -35,20 +35,12 @@ void Graph::addVertices(vector<Vertex> &t_vertices){
     }
 }
 
-void Graph::printOrderedEdges(Vertex &t_vertex){
-    priority_queue<Edge, std::vector<Edge>, std::greater<Edge>> t_queue(t_vertex.out_edge_heap);
-    while(t_queue.size() > 0){
-        Edge t_edge = t_queue.top();
-        t_queue.pop();
-            cout << t_edge.from  << " <---"<< t_edge.weight << "--->" << t_edge.to << endl;
-    }
-}
 
-Vertex& Graph::getVertex(const int &id){
+Vertex Graph::getVertex(const int &id){
     return m_vertices.at(id);
 }
 
-vector<Vertex> Graph::getVertices(){
+vector<Vertex> &Graph::getVertices(){
     return m_vertices;
 }
 
@@ -89,9 +81,10 @@ vector<int> Graph::primMST(){
 void Graph::readFromFile(std::string file_name){
     ifstream in_file(file_name);
     string str_num;
-    int x = -1, y = -1, id = -1;
+    int x = -1, y = -1;
+    int id = -1;
     if(!in_file.is_open()){
-        std::cout << "File didn't open!" << endl;
+        std::cout << "ERROR: The file " << file_name << " didn't open!" << endl;
         return;
     }
 
@@ -102,6 +95,9 @@ void Graph::readFromFile(std::string file_name){
         stream >> id;
         stream >> x;
         stream >> y;
+        if(id % 1000 == 0){
+            cout << "Loading vertex " << id << endl;
+        }
         Vertex vertex_to_add(x, y, id);
         addVertex(vertex_to_add);
     }
@@ -110,35 +106,14 @@ void Graph::readFromFile(std::string file_name){
 
 // Vertex Implementations
 void Vertex::addEdge(Vertex &other_vertex){
-    Edge t_edge(*this, other_vertex);
-    out_edges.push_back(t_edge);
-    if(t_edge.weight != 0){
-        out_edge_heap.push(t_edge);
-    }
+    out_edges.push_back(Edge(*this, other_vertex));
+
 }
 
-
-bool Vertex::operator> (const Vertex &other_vertex) const{
-    return (this->out_edge_heap.top() > other_vertex.out_edge_heap.top());
-}
-
-bool Vertex::operator>= (const Vertex &other_vertex) const {
-   return (this->out_edge_heap.top() >= other_vertex.out_edge_heap.top());
-}
-
-bool Vertex::operator< (const Vertex &other_vertex) const {
-    return (this->out_edge_heap.top() < other_vertex.out_edge_heap.top());
-}
-
-bool Vertex::operator<= ( const Vertex &other_vertex) const {
-    return (this->out_edge_heap.top() <= other_vertex.out_edge_heap.top());
-}
 
 // Edge implementations
 int Edge::calculateWeight(Vertex &t_from, Vertex &t_to){
         int t_weight = -1;
-        // FUNCTION CURRENTLY ONLY ROUNDS DOWN
-        // TODO: MAKE FUNCTION ROUND UP OR DOWN
         if(t_from.id != t_to.id){
             float t_number = sqrt(pow((t_from.y - t_to.y), 2) + pow((t_from.x - t_to.x), 2));
             t_weight = round(t_number);
@@ -151,18 +126,6 @@ int Edge::calculateWeight(Vertex &t_from, Vertex &t_to){
 
 bool Edge::operator> (const Edge &other_edge) const{
     return (this->weight > other_edge.weight);
-}
-
-bool Edge::operator>= (const Edge &other_edge) const {
-   return (this->weight >= other_edge.weight);
-}
-
-bool Edge::operator< (const Edge &other_edge) const {
-    return (this->weight < other_edge.weight);
-}
-
-bool Edge::operator<= ( const Edge &other_edge) const {
-    return (this->weight <= other_edge.weight);
 }
 
 

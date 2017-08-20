@@ -1,61 +1,42 @@
 #include "tsp_algo_nearest_neighbors.h"
-#include <cassert>
 
-void TSP_Algo_Nearest_Neighbors::findPath(){
+void TSP_Algo_Nearest_Neighbors::findPath(int index){
     printf("Finding nearest neighbor route...\n");
     auto start = std::chrono::high_resolution_clock::now();
     int size = m_vertices->size();
     int t_total_route_length = 0;
+    Vertex* current_node = &m_vertices->at(index);
 
-    // copy of vertices
-    // necessary to use copy to preserve integrity of original vertices' min heaps
-    //vector<Vertex> m_vertices(m_graph->getVertices());
     // record of which vertices are in the route
     vector<bool> inRoute(m_vertices->size(), false);
 
     // record of current route
-    vector<short> t_simple_route(size);
+    vector<int> t_simple_route(size);
+    t_simple_route[0] = index;
 
+    inRoute[index] = true;
 
-    // pointer to min heap of the current vertex
-    std::priority_queue<Edge, std::vector<Edge>, std::greater<Edge>>* t_heap;
+    int num_in_tour = 0;
+    int min_index;
+    int min_weight;
 
-    // set heap to be the heap of the first vertex and pop off the top edge
-    t_heap = &(m_vertices->front().getEdgeHeap());
-    Edge current_edge = t_heap->top();
-    t_total_route_length = current_edge.getWeight();
-    t_heap->pop();
-
-    // set heap to be the heap of
-    t_heap = &(m_vertices->at(current_edge.getTo()).getEdgeHeap());
-
-    inRoute[current_edge.getFrom()] = true;
-    inRoute[current_edge.getTo()] = true;
-    t_simple_route[0] = current_edge.getFrom();
-    t_simple_route[1] = current_edge.getTo();
-
-    short num_in_tour = 1;
     while(num_in_tour < size-1){
-        current_edge = t_heap->top();
-
-        // empties heap of current vertex until an edge to
-        // an untraversed vertex is at the top
-        while(inRoute[current_edge.getTo()] == true){
-            t_heap->pop();
-            current_edge = t_heap->top();
+        min_index = -1;
+        min_weight = INT32_MAX;
+        for(int i = 0; i < size; i++){
+            if(!inRoute[i] && current_node->getEdge(i)->getWeight() < min_weight){
+                min_index = i;
+                min_weight = current_node->getEdge(i)->getWeight();
+            }
         }
-        t_heap->pop();
-        t_heap = &(m_vertices->at(current_edge.getTo()).getEdgeHeap());
-
-        // add vertex of traversed edge to the route
-        t_simple_route[++num_in_tour] = current_edge.getTo();
-        inRoute[current_edge.getTo()] = true;
-        t_total_route_length += current_edge.getWeight();
+        inRoute[min_index] = true;
+        t_simple_route[++num_in_tour] = min_index;
+        t_total_route_length += min_weight;
+        current_node = &m_vertices->at(min_index);
     }
 
-    // edge connecting the end to the beginning
-    Edge last_edge(m_vertices->at(current_edge.getTo()), m_vertices->at(t_simple_route[0]));
-    t_total_route_length += last_edge.getWeight();
+    // Add the final edge connecting the end to the beginning
+    t_total_route_length += current_node->getEdge(index)->getWeight();
 
     m_simple_route = t_simple_route;
     m_route_length = t_total_route_length;
@@ -75,7 +56,7 @@ void TSP_Algo_Nearest_Neighbors::twoOpt(chrono::high_resolution_clock::time_poin
 
     int old_length = this->m_route_length;
     int current_length = this->m_route_length;
-    vector<short> current_route(this->m_simple_route);
+    vector<int> current_route(this->m_simple_route);
 
     Edge *old_edge_1;
     Edge *old_edge_2;
@@ -104,15 +85,15 @@ void TSP_Algo_Nearest_Neighbors::twoOpt(chrono::high_resolution_clock::time_poin
         for(int i = 0; i < size-2; i++){
             for(int k = i+2; k < size; k++){
 
-                old_edge_1 = &(m_vertices->at(current_route[i]).getEdge(current_route[i+1]));
-                new_edge_1 = &(m_vertices->at(current_route[i]).getEdge(current_route[k]));
+                old_edge_1 = m_vertices->at(current_route[i]).getEdge(current_route[i+1]);
+                new_edge_1 = m_vertices->at(current_route[i]).getEdge(current_route[k]);
                 if(k < size-1){
-                    old_edge_2 = &(m_vertices->at(current_route[k]).getEdge(current_route[k+1]));
-                    new_edge_2 = &(m_vertices->at(current_route[i+1]).getEdge(current_route[k+1]));
+                    old_edge_2 = m_vertices->at(current_route[k]).getEdge(current_route[k+1]);
+                    new_edge_2 = m_vertices->at(current_route[i+1]).getEdge(current_route[k+1]);
                 }
                 else{
-                    old_edge_2 = &(m_vertices->at(current_route[k]).getEdge(current_route[0]));
-                    new_edge_2 = &(m_vertices->at(current_route[i+1]).getEdge(current_route[0]));
+                    old_edge_2 = m_vertices->at(current_route[k]).getEdge(current_route[0]);
+                    new_edge_2 = m_vertices->at(current_route[i+1]).getEdge(current_route[0]);
                 }
 
                 old_edge_1_weight = old_edge_1->getWeight();
@@ -124,29 +105,28 @@ void TSP_Algo_Nearest_Neighbors::twoOpt(chrono::high_resolution_clock::time_poin
                 change = new_edge_1_weight + new_edge_2_weight - old_edge_1_weight - old_edge_2_weight;
                 if(min_change > change){
                     min_change = change;
+                    current_length += min_change;
                     min_i = i+1;
                     min_k = k+1;
                 }
             }
         }
         // reverse order of route between two indices
-        // logically
         if(min_i != -1){
-            current_length += min_change;
-            vector<short>::iterator t_end = current_route.begin() + min_k;
+            vector<int>::iterator t_end = current_route.begin() + min_k;
             std::reverse(current_route.begin() + min_i, t_end);
         }
 
         // report time and length of every 25th iteration
         finish = std::chrono::high_resolution_clock::now();
         time_overall = finish - time_overall_start;
-        if(iterations % 25 == 0){
+        if(iterations % 10 == 0){
             elapsed = finish - start;
             printf("%d iterations took: %f seconds\n",iterations, elapsed.count());
             printf("Current route length: %d\n----------------------------------------\n", current_length);
         }
-    // repeat for 1000 iterations, until the length hasn't changed between iterations, or until 170 seconds have passed
-    }while(iterations <= 1500 && old_length != current_length && time_overall.count() < 170);
+    // repeat for 1500 iterations, until the length hasn't changed between iterations, or until 173 seconds have passed
+    }while(iterations <= 1500 && old_length != current_length);
 
 
     this->m_simple_route = current_route;
@@ -159,15 +139,15 @@ void TSP_Algo_Nearest_Neighbors::twoOpt(chrono::high_resolution_clock::time_poin
     printf("Total time taken: %f seconds\n----------------------------------------\n", time_overall.count());
 }
 
-int TSP_Algo_Nearest_Neighbors::calcPathLength(vector<short>& t_route){
+int TSP_Algo_Nearest_Neighbors::calcPathLength(vector<int>& t_route){
     int t_total_length = 0;
     int size = t_route.size() - 1;
     Edge* current_edge;
     for(int i = 0; i < size; i++){
-       current_edge = &(m_vertices->at(t_route[i]).getEdge(t_route[i+1]));
+       current_edge = m_vertices->at(t_route[i]).getEdge(t_route[i+1]);
        t_total_length += current_edge->getWeight();
     }
-    current_edge = &(m_vertices->at(t_route[size]).getEdge(t_route[0]));
+    current_edge = m_vertices->at(t_route[size]).getEdge(t_route[0]);
     t_total_length += current_edge->getWeight();
     return t_total_length;
 }
