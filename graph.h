@@ -24,11 +24,11 @@
 **                                                                                 **
 ************************************************************************************/
 
-#ifndef GRAPH_H
-#define GRAPH_H
+#ifndef GRAPH_H_
+#define GRAPH_H_
+#include <math.h>
 #include <vector>
 #include <queue>
-#include <math.h>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -45,12 +45,12 @@ class Vertex{
     friend class Graph;
     friend class Edge;
 
-    Vertex(const int &t_x, const int &t_y, const int &t_id) : x(t_x), y(t_y), id(t_id) {}
+    Vertex(const int &t_x, const int &t_y, const int &t_id)
+        : x(t_x), y(t_y), id(t_id) {}
     void addEdge(const Vertex &other_vertex);
 
     std::vector<Edge> getEdges() { return out_edges; }
     const Edge* getEdge(const int& i) { return &(out_edges.at(i)); }
-    //int getEdgeWeight(const int& t_to) { return out_edges.at(t_to).getWeight(); }
     inline int getY() const { return y; }
     inline int getX() const { return x; }
     inline int getID() const { return id; }
@@ -68,8 +68,10 @@ class Edge{
     friend class Graph;
     friend class Vertex;
 
-    Edge(const Vertex &t_from, const Vertex &t_to) : to(t_to.id), weight(calculateWeight(t_from, t_to)) {}
-    Edge(const int &t_to, const int &t_weight) : to(t_to) , weight(t_weight) {}
+    Edge(const Vertex &t_from, const Vertex &t_to)
+        : to(t_to.id), weight(calculateWeight(t_from, t_to)) {}
+    Edge(const int &t_to, const int &t_weight)
+        : to(t_to) , weight(t_weight) {}
 
     inline int getTo() const { return to; }
     inline int getWeight() const { return weight; }
@@ -78,6 +80,7 @@ class Edge{
 
  protected:
     int calculateWeight(const Vertex &t_from, const Vertex &t_to);
+
     const int to;
     const int weight;
 };
@@ -100,10 +103,12 @@ class Graph {
     std::vector<int> getPrimMST();
     std::vector<int> getDijkstraPath(int starting_index);
 
+    int calcPathLength(Graph* t_graph, const std::vector<int> &t_route);
+
  private:
     void readFromFile(std::string file_name);
     std::vector<Vertex> m_vertices;
     int size = 0;
 };
 
-#endif // GRAPH_H
+#endif  // GRAPH_H
