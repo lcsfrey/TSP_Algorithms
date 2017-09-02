@@ -90,20 +90,21 @@ std::vector<int> Graph::getPrimMST() {
     parent[0] = 0;
     t_queue.push(&m_vertices[0].out_edges[0]);
     while (t_queue.size() >0) {
-        Edge *t_vertex = t_queue.top();
+        Edge *t_current_edge = t_queue.top();
         t_queue.pop();
-        inMST[t_vertex->to] = true;
-        for (auto t_edge : m_vertices[t_vertex->to].out_edges) {
+        inMST[t_current_edge->to] = true;
+        for (auto t_edge : m_vertices[t_current_edge->to].out_edges) {
             if (inMST[t_edge.to] == false && t_edge.weight < key[t_edge.to]) {
                 key[t_edge.to] = t_edge.weight;
-                t_queue.push(&m_vertices[t_vertex->to].out_edges[t_edge.to]);
-                parent[t_edge.to] = t_vertex->to;
+                t_queue.push(&m_vertices[t_current_edge->to].out_edges[t_edge.to]);
+                parent[t_edge.to] = t_current_edge->getTo();
             }
         }
     }
     auto finish = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = finish - start;
-    printf("Minimum spanning tree took: %f seconds\n----------------------------------------\n", elapsed.count());
+    printf("Minimum spanning tree took: %f seconds\n", elapsed.count());
+    printf("----------------------------------------\n");
     return parent;
 }
 
@@ -113,6 +114,17 @@ std::vector<int> Graph::getDijkstraPath(int starting_index) {
 
     distances[starting_index] = 0;
     inPath[starting_index] = true;
+    return distances;
+}
+
+int Graph::calcPathLength(Graph* t_graph, const std::vector<int> &t_route) {
+    int t_total_length = 0;
+    int size = t_route.size() - 1;
+    for (int i = 0; i < size - 1; i++) {
+        t_total_length += t_graph->getEdgeWeight(t_route[i], t_route[i+1]);
+    }
+    t_total_length += t_graph->getEdgeWeight(t_route[size], t_route[0]);
+    return t_total_length;
 }
 
 void Graph::readFromFile(std::string file_name) {
@@ -144,7 +156,6 @@ void Graph::readFromFile(std::string file_name) {
 // Vertex Implementations
 void Vertex::addEdge(const Vertex &other_vertex) {
     out_edges.push_back(Edge(*this, other_vertex));
-
 }
 
 // Edge implementations

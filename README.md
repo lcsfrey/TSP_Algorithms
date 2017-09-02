@@ -13,11 +13,11 @@ This is a project I developed for my analysis of algorithms class. The objective
       * Displays algorithms mentioned above
       * Displays length of tour
 
-  Prim's Minimum Spanning Tree
+  ### Prim's Minimum Spanning Tree
   ![picture alt](https://raw.githubusercontent.com/lcsfrey/TSP_Algorithms/master/readme_images/img_gplot_mst.png "Graph Plot MST")
-  Nearest Neighbor Tour
+  ### Nearest Neighbor Tour
   ![picture alt](https://raw.githubusercontent.com/lcsfrey/TSP_Algorithms/master/readme_images/img_gplot_nn.png "Graph Plot Nearest Neighbor")
-  2-Optimal Tour
+  ### 2-Optimal Tour
   ![picture alt](https://raw.githubusercontent.com/lcsfrey/TSP_Algorithms/master/readme_images/img_gplot_two_opt.png "Graph Plot 2-Optimal")
   
 # Todo List
