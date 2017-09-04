@@ -23,8 +23,8 @@
 **                                                                                 **
 ************************************************************************************/
 
-#ifndef TSP_ALGO_NEAREST_NEIGHBORS_H
-#define TSP_ALGO_NEAREST_NEIGHBORS_H
+#ifndef TSP_ALGO_NEAREST_NEIGHBORS_H_
+#define TSP_ALGO_NEAREST_NEIGHBORS_H_
 #include <algorithm>
 #include <string>
 #include <fstream>
@@ -34,29 +34,40 @@
 
 namespace TSP_Algos {
 
-class TSP_Algo_Nearest_Neighbors
-{
+class TSP_Algo_Nearest_Neighbors {
  public:
-    TSP_Algo_Nearest_Neighbors(Graph* t_graph) : m_graph(t_graph) {
+    explicit TSP_Algo_Nearest_Neighbors(Graph* t_graph) : m_graph(t_graph) {
         m_vertices = &(m_graph->getVertices());
     }
+
+    // calculates the nearest neighbor tour starting at starting_index
     void findPath(int starting_index = 0);
-    void twoOpt(std::chrono::system_clock::time_point time_overall_start = std::chrono::high_resolution_clock::now());
+
+    // calculates the 2-optimal tour
+    // m_simple_tour must already have an initial route
+    void twoOpt();
 
     inline std::vector<int> getRoute() const { return m_simple_route; }
     inline int getRouteLength() const { return m_route_length; }
 
+    // outputs file with the same name as the input file appended with ".tour"
+    // first line is the length of the tour
+    // subsequent lines the IDs of the vertices in the order they are visited
     void writeToFile(std::string file_name);
 
  private:
-    int calcPathLength(const std::vector<int> &t_route);
+    // returns the difference between the sum of the weights of two pairs of edges
+    // first pair of edges connect i to i+1 and k to k+1 in the route
+    // second pair of edges connect i to k and i+1 to k+1 in the route
+    int calcChangeOfEdges(const std::vector<int> current_route, const int& i, const int& k, const int &size);
 
     int m_route_length = 0;
     std::vector<Vertex>* m_vertices;
     std::vector<int> m_simple_route;
     Graph* m_graph;
-
 };
 
-}
-#endif // TSP_ALGO_NEAREST_NEIGHBORS_H
+
+}  // namespace TSP_Algos
+
+#endif  // TSP_ALGO_NEAREST_NEIGHBORS_H_
