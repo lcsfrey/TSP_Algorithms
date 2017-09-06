@@ -1,7 +1,40 @@
+/************************************************************************************
+**                                                                                 **
+**  MIT License                                                                    **
+**                                                                                 **
+**  Copyright (c) 2017 Lucas Frey                                                  **
+**                                                                                 **
+**  Permission is hereby granted, free of charge, to any person obtaining          **
+**  a copy of this software and associated documentation files (the "Software"),   **
+**  to deal in the Software without restriction, including without limitation      **
+**  the rights to use, copy, modify, merge, publish, distribute, sublicense,       **
+**  and/or sell copies of the Software, and to permit persons to whom the          **
+**  Software is furnished to do so, subject to the following conditions:           **
+**                                                                                 **
+**  The above copyright notice and this permission notice shall be included        **
+**  in all copies or substantial portions of the Software.                         **
+**                                                                                 **
+**  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS        **
+**  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,    **
+**  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    **
+**  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         **
+**  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  **
+**  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  **
+**  SOFTWARE.                                                                      **
+**                                                                                 **
+************************************************************************************/
+
+// Graph Path Trie
+// Data structure that views the traveling salesman problem as a prefix tree,
+// otherwise known as a trie. The structure creates a starting node, containing
+// an array of node pointers to the next potential vertex that can be visited.
+// This structure considers all permutations of the TSP route, so this method
+// is technically no better than the brute force approach.
+
 #ifndef GRAPH_PATH_TRIE_H_
 #define GRAPH_PATH_TRIE_H_
 #include "graph.h"
-
+#include <vector>
 
 class Vertex_TrieNode {
     //  t_graph : the graph we are using
@@ -11,87 +44,32 @@ class Vertex_TrieNode {
     //  t_length : length of tour if it ended here
     public:
         Vertex_TrieNode(Graph* t_graph,
-                    Vertex* t_vert_pointer,
-                    bool inPath[],
-                    const int& size,
-                    int t_length) : m_vertices(&t_graph->getVertices()) {
+                        Vertex* t_vert_pointer,
+                        std::vector<bool> t_in_route,
+                        const int& size,
+                        int t_length);
 
-        m_vert_pointer = t_vert_pointer;
-        //this->m_vertices = &t_graph->getVertices();
-        m_length_so_far = t_length;
-        // reinitialize visited array
-        bool t_in_path[size];
-        for (int i = 0; i < size; i++) {
-            t_in_path[i] = inPath[i];
-        }
-
-        for (int i = 0; i < size; i++) {
-            // if the i th node has not been visited
-            if (!inPath[i]) {
-
-                // visit node
-                m_in_path[i] = true;
-
-                // calculate the cost of moving to this node
-                int change = t_vert_pointer->getEdge(i)->getWeight();
-
-                // create node with with the state of the tour if we had
-                // visited that vertex next
-                // length of tour in that state = = m_length_so_far + change
-                Vertex_TrieNode* t_node_pointer;
-                t_node_pointer = new Vertex_TrieNode(t_graph,
-                                                     &m_vertices->at(i),
-                                                     m_in_path,
-                                                     size,
-                                                     m_length_so_far + change);
-
-                // Add this node to the set of possible next
-                m_potential_next_paths.push_back(t_node_pointer);
-
-                // Necessary tp mark it as false (unvisited) again as each
-                // iteration through the for loop we want it to create a
-                // potential path where only one new vertex (inPath[i]) is
-                // visited.
-                m_in_path[i] = false;
-            }
-        }
-    }
+    // member variables:
+    //   *m_ver_pointer : pointer to vertex that was visited by creating this node
+    //   *m_length_so_far : current length;
+    //   *m_in_route : boolean array of which vertices are in the tour already
+    //   *m_potential_next_paths : vector of pointers to nodes we could look at visiting next
+    //   *m_vertices : pointer to the vector of vertices
     private:
     const Vertex* m_vert_pointer;
-    int m_length_so_far = 0;
-    bool* m_in_path;
+    int m_length_so_far;
+    std::vector<bool> m_in_route;
     std::vector<Vertex_TrieNode*> m_potential_next_paths;
-    std::vector<Vertex>* m_vertices;
 };
 
 class Graph_path_trie {
  public:
-        Graph_path_trie(Graph *t_graph,
-                        const int& t_size) : m_graph(t_graph), size(t_size){
-
-                for (int i = 0; i < size; i++) {
-                    m_in_path = new bool[size];
-                    for (int i = 0; i < size; i++) {
-                        m_in_path[i] = false;
-                    }
-                    m_in_path[i] = true;
-                    std::vector<Vertex>* t_vertices_pointer = &t_graph->getVertices();
-                    Vertex* t_vertex_pointer = &t_vertices_pointer->at(i);
-                    Vertex_TrieNode* t_vertex_trie_pointer = new Vertex_TrieNode(t_graph, t_vertex_pointer, m_in_path, size, 0);
-                    m_starting_vertex.push_back(t_vertex_trie_pointer);
-
-                    m_in_path[i] = false;
-
-                //m_in_path = new bool[size];
-               // m_starting_vertex.push_back(new Vertex_TrieNode(t_graph, &t_graph->getVertex(i), m_in_path, size, 0));
-
-           }
-        }
+        Graph_path_trie(Graph *t_graph, const int t_size);
 
  private:
-        Graph* m_graph;
-        bool *m_in_path;
-        std::vector<Vertex_TrieNode*> m_starting_vertex;
+        const Graph* m_graph;
+        std::vector<bool> m_in_route;
+        Vertex_TrieNode* m_starting_vertex;
         const int size;
 };
 
