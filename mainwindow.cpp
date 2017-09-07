@@ -32,29 +32,10 @@
 #include "ui_mainwindow.h"
 #include "tsp_algo_nearest_neighbors.h"
 
-// draws traveling salesman approximation lines
-void drawTourLines(QCustomPlot *customPlot,
-                   std::vector<Vertex> vertices,
-                   std::vector<int> connections);
-
-// draws minimum spanning tree lines
-void drawPrimLines(QCustomPlot *customPlot,
-                   std::vector<Vertex> vertices,
-                   std::vector<int> connections);
-
-// draws vertices on graph
-void drawPoints(QCustomPlot *customPlot,
-                std::vector<Vertex> *vertices);
-
-// deletes all drawn lines and vertices from graph
-// reinitializes drawing properties
-void resetGraph(QCustomPlot *customPlot);
-
 // initializes main window
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow) {
     ui->setupUi(this);
-    resetGraph(ui->customPlot);
     ui->file_status->setText(QString("Current file: None"));
     m_vertices = nullptr;
 }
@@ -66,7 +47,7 @@ MainWindow::~MainWindow() {
 void MainWindow::paintEvent(QPaintEvent *e) {
 }
 
-void resetGraph(QCustomPlot *customPlot) {
+void MainWindow::resetGraph(QCustomPlot *customPlot) {
     if (customPlot->graphCount() > 0) {
         customPlot->clearGraphs();
     }
@@ -86,87 +67,65 @@ void resetGraph(QCustomPlot *customPlot) {
     customPlot->graph(0)->setScatterStyle(scatter_style);
 }
 
-// prim button function
+// prim's minimum spanning tree button
 void MainWindow::on_button_prim_clicked() {
     m_line_choice = 0;
-    QString t__qstring("Selected Prim Minimum Spanning Tree");
-    ui->m_label_algorithm->setText(t__qstring);
+    QString status_label("Selected Prim's Minimum Spanning Tree");
+    ui->m_label_algorithm->setText(status_label);
     ui->customPlot->replot();
 }
 
-// dijkstra button function
+// dijkstra's shortest path button
 void MainWindow::on_button_dijkstras_clicked() {
     m_line_choice = 1;
-    QString t__qstring("Selected Dijkstra's Shortest Path");
-    ui->m_label_algorithm->setText(t__qstring);
+    QString status_label("Selected Dijkstra's Shortest Path");
+    ui->m_label_algorithm->setText(status_label);
     ui->customPlot->replot();
 }
 
+// nearest neighbor button
 void MainWindow::on_button_nearest_clicked() {
     m_line_choice = 2;
-    QString t__qstring("Selected Nearest Neighbor Tour");
-    ui->m_label_algorithm->setText(t__qstring);
+    QString status_label("Selected Nearest Neighbor Tour");
+    ui->m_label_algorithm->setText(status_label);
     ui->customPlot->replot();
 }
 
+// 2-optimal tour button
 void MainWindow::on_button_two_opt_clicked() {
     m_line_choice = 3;
-    QString t__qstring("Selected 2-Opt Tour");
-    ui->m_label_algorithm->setText(t__qstring);
+    QString status_label("Selected 2-Opt Tour");
+    ui->m_label_algorithm->setText(status_label);
     ui->customPlot->replot();
 }
 
-
+// draws the selected algorithm on the screen
 void MainWindow::on_button_draw_clicked() {
     if (m_vertices->size() == 0) return;
-    // ui->m_label_algorithm->setText();
     resetGraph(ui->customPlot);
     drawPoints(ui->customPlot, m_vertices);
     switch (m_line_choice) {
-        case 0: {  // Prim Minimum Spanning
-            QString t__qstring("Showing Prim Minimum Spanning Tree");
-            ui->m_label_algorithm->setText(t__qstring);
-            std::vector<int> mst = m_graph->getPrimMST();
-            drawPrimLines(ui->customPlot, *m_vertices, mst);
+        case 0: {  // Prim's Minimum Spanning
+            displayPrim();
             break;
         }
-        case 1:  // Dijsktra's Shortest Path
-            break;
-        case 2:  {  // Nearest Neighbor Tour
-            QString t__qstring("Showing Nearest Neighbors Tour");
-            ui->m_label_algorithm->setText(t__qstring);
-            TSP_Algos::TSP_Algo_Nearest_Neighbors algo_nn(m_graph);
-            algo_nn.findPath(m_starting_index);
-            m_tour = algo_nn.getRoute();
-            drawTourLines(ui->customPlot, *m_vertices, m_tour);
-            std::string str_tour(std::to_string(algo_nn.getRouteLength()));
-            QString t_q_string(str_tour.c_str());
-            ui->m_label_tour_length->setText(t_q_string);
+        case 1: {  // Dijsktra's Shortest Path
+            displayDijkstras();
             break;
         }
-        case 3: {  // 2-Optimum Tour
-            QString t__qstring("Showing 2-Optimum Tour");
-            ui->m_label_algorithm->setText(t__qstring);
-            TSP_Algos::TSP_Algo_Nearest_Neighbors algo_nn(m_graph);
-            if (m_tour.size() == 0) {
-                algo_nn.findPath(m_starting_index);
-                m_tour = algo_nn.getRoute();
-            }
-            algo_nn.setTour(m_tour);
-            algo_nn.twoOpt();
-            ui->m_label_tour_length->setText(QString(algo_nn.getRouteLength()));
-            m_tour = algo_nn.getRoute();
-            drawTourLines(ui->customPlot, *m_vertices, m_tour);
-            std::string str_tour(std::to_string(algo_nn.getRouteLength()));
-            QString t_q_string(str_tour.c_str());
-            ui->m_label_tour_length->setText(t_q_string);
+        case 2: {  // Nearest Neighbor Tour
+            displayNearestNeighbor();
+            break;
+        }
+        case 3: {  // 2-Optimal Tour
+            displayTwoOpt();
             break;
         }
     }
     ui->customPlot->replot();
 }
 
-void drawTourLines(QCustomPlot *customPlot,
+void MainWindow::drawTourLines(QCustomPlot *customPlot,
                    std::vector<Vertex> vertices,
                    std::vector<int> connections) {
     int size = connections.size() - 1;
@@ -192,7 +151,7 @@ void drawTourLines(QCustomPlot *customPlot,
     line->end->setCoords(child_x, child_y + 20);
 }
 
-void drawPrimLines(QCustomPlot *customPlot,
+void MainWindow::drawPrimLines(QCustomPlot *customPlot,
                    std::vector<Vertex> vertices,
                    std::vector<int> connections) {
     for (auto vertex : vertices) {
@@ -208,7 +167,7 @@ void drawPrimLines(QCustomPlot *customPlot,
     }
 }
 
-void drawPoints(QCustomPlot *customPlot, std::vector<Vertex> *vertices) {
+void MainWindow::drawPoints(QCustomPlot *customPlot, std::vector<Vertex> *vertices) {
     if (vertices == nullptr) return;
 
     for (auto vertex : *vertices) {
@@ -227,7 +186,7 @@ void drawPoints(QCustomPlot *customPlot, std::vector<Vertex> *vertices) {
     }
 }
 
-void MainWindow::on_pushButton_7_clicked() {
+void MainWindow::on_button_load_vertices_clicked() {
     resetGraph(ui->customPlot);
     QString q_file_name(ui->input_file->text());
     std::string file_name(q_file_name.toStdString());
@@ -248,7 +207,6 @@ void MainWindow::on_pushButton_7_clicked() {
             max_y = y;
     }
 
-    // set axes ranges, so we see all data:
     ui->customPlot->xAxis->setRange(0, max_x+50);
     ui->customPlot->yAxis->setRange(0, max_y+50);
     drawPoints(ui->customPlot, m_vertices);
@@ -261,6 +219,7 @@ void MainWindow::on_pushButton_7_clicked() {
     ui->customPlot->replot();
 }
 
+// button to clear lines from screen
 void MainWindow::on_button_clear_clicked() {
     resetGraph(ui->customPlot);
     drawPoints(ui->customPlot, m_vertices);
@@ -269,7 +228,66 @@ void MainWindow::on_button_clear_clicked() {
     ui->customPlot->replot();
 }
 
-void MainWindow::on_spinBox_editingFinished()
-{
+void MainWindow::on_spinBox_editingFinished() {
     m_starting_index = ui->spinBox->value();
+}
+
+void MainWindow::displayPrim() {
+    QString status_label("Calculating Prim's Minimum Spanning Tree...");
+    ui->m_label_algorithm->setText(status_label);
+    ui->customPlot->replot();
+
+    std::vector<int> mst = m_graph->getPrimMST();
+    drawPrimLines(ui->customPlot, *m_vertices, mst);
+
+    status_label = "Showing Prim's Minimum Spanning Tree";
+    ui->m_label_algorithm->setText(status_label);
+}
+
+void MainWindow::displayDijkstras() {
+    QString status_label("Calculating Dijktra's Shortest Path...");
+    ui->m_label_algorithm->setText(status_label);
+    ui->customPlot->replot();
+
+    std::vector<int> dijkstra_path = m_graph->getDijkstraPath(m_starting_index);
+    drawPrimLines(ui->customPlot, *m_vertices, dijkstra_path);
+
+    status_label = "Showing Dijkstra's Shortest Path";
+    ui->m_label_algorithm->setText(status_label);
+}
+
+void MainWindow::displayNearestNeighbor() {
+    QString status_label("Calculating Nearest Neighbors Tour...");
+    ui->m_label_algorithm->setText(status_label);
+    ui->customPlot->replot();
+
+    TSP_Algos::TSP_Algo_Nearest_Neighbors algo_nn(m_graph);
+    algo_nn.findPath(m_starting_index);
+    m_tour = algo_nn.getRoute();
+    drawTourLines(ui->customPlot, *m_vertices, m_tour);
+
+    std::string str_tour_length(std::to_string(algo_nn.getRouteLength()));
+    QString q_str_tour_length(str_tour_length.c_str());
+    ui->m_label_tour_length->setText(q_str_tour_length);
+    status_label = "Showing Nearest Neighbors Tour";
+    ui->m_label_algorithm->setText(status_label);
+}
+
+void MainWindow::displayTwoOpt() {
+    QString status_label("Calculating 2-Optimal Tour...");
+    ui->m_label_algorithm->setText(status_label);
+    ui->customPlot->replot();
+
+    TSP_Algos::TSP_Algo_Nearest_Neighbors algo_nn(m_graph);
+    algo_nn.findPath(m_starting_index);
+    algo_nn.twoOpt();
+    m_tour = algo_nn.getRoute();
+    drawTourLines(ui->customPlot, *m_vertices, m_tour);
+
+    ui->m_label_tour_length->setText(QString(algo_nn.getRouteLength()));
+    std::string str_tour(std::to_string(algo_nn.getRouteLength()));
+    QString t_q_string(str_tour.c_str());
+    ui->m_label_tour_length->setText(t_q_string);
+    status_label = "Showing 2-Optimal Tour";
+    ui->m_label_algorithm->setText(status_label);
 }
