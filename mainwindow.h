@@ -5,6 +5,7 @@
 #include <QtGui>
 #include <QtCore>
 #include "graph.h"
+#include "ui_mainwindow.h"
 
 namespace Ui {
 class MainWindow;
@@ -20,6 +21,28 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *e);
+    // draws traveling salesman approximation lines
+    void drawTourLines(QCustomPlot *customPlot,
+                       std::vector<Vertex> vertices,
+                       std::vector<int> connections);
+
+    // draws minimum spanning tree lines
+    void drawPrimLines(QCustomPlot *customPlot,
+                       std::vector<Vertex> vertices,
+                       std::vector<int> connections);
+
+    // draws vertices on graph
+    void drawPoints(QCustomPlot *customPlot,
+                    std::vector<Vertex> *vertices);
+
+    // deletes all drawn lines and vertices from graph
+    // reinitializes drawing properties
+    void resetGraph(QCustomPlot *customPlot);
+
+    void displayPrim();
+    void displayDijkstras();
+    void displayNearestNeighbor();
+    void displayTwoOpt();
 
 private slots:
     void on_button_prim_clicked();
@@ -32,8 +55,7 @@ private slots:
 
     void on_button_draw_clicked();
 
-    void on_pushButton_7_clicked();
-
+    void on_button_load_vertices_clicked();
 
     void on_button_clear_clicked();
 
