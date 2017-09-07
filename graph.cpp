@@ -110,20 +110,38 @@ std::vector<int> Graph::getPrimMST() {
 
 std::vector<int> Graph::getDijkstraPath(int starting_index) {
     std::vector<bool> inPath(size, false);
-    std::vector<int> distances;
+    std::vector<int> distance(size, INT32_MAX);
+    std::vector<int> parent(size, -1);
 
-    distances[starting_index] = 0;
-    inPath[starting_index] = true;
-    return distances;
+    distance[starting_index] = 0;
+    parent[starting_index] = starting_index;
+    for (int count = 0; count < size - 1; count++){
+        int min = INT32_MAX;
+        int min_index = 0;
+        for (int i = 0; i < size; i++) {
+            if (inPath[i] == false && distance[i] < min) {
+                min = distance[i];
+                min_index = i;
+            }
+        }
+        inPath[min_index] = true;
+        for (int i = 0; i < size; i++) {
+            if(!inPath[i] && distance[min_index] + getEdgeWeight(min_index, i) < distance[i]) {
+                parent[i] = min_index;
+                distance[i] = distance[min_index] + getEdgeWeight(min_index, i);
+            }
+        }
+    }
+    return parent;
 }
 
-int Graph::calcPathLength(Graph* t_graph, const std::vector<int> &t_route) {
+int Graph::calcPathLength(const std::vector<int> &t_route) {
     int t_total_length = 0;
     int size = t_route.size() - 1;
     for (int i = 0; i < size - 1; i++) {
-        t_total_length += t_graph->getEdgeWeight(t_route[i], t_route[i+1]);
+        t_total_length += getEdgeWeight(t_route[i], t_route[i+1]);
     }
-    t_total_length += t_graph->getEdgeWeight(t_route[size], t_route[0]);
+    t_total_length += getEdgeWeight(t_route[size], t_route[0]);
     return t_total_length;
 }
 
