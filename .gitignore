@@ -1,0 +1,5 @@
+*.o
+mainwindow_copy.*
+moc_predefs.h
+moc_mainwindow.cpp
+moc_qcustomplot.cpp
