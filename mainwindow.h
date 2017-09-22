@@ -20,7 +20,6 @@ public:
     ~MainWindow();
 
 protected:
-    void paintEvent(QPaintEvent *e);
     // draws traveling salesman approximation lines
     void drawTourLines(QCustomPlot *customPlot,
                        std::vector<Vertex> vertices,
@@ -61,13 +60,17 @@ private slots:
 
     void on_spinBox_editingFinished();
 
+    void on_m_button_random_add_vertices_clicked();
+
     private:
-    int m_label_tour_length = 0;
     Graph* m_graph = nullptr;
     std::vector<Vertex>* m_vertices = nullptr;
     std::vector<int> m_tour;
     int m_line_choice = 0;
     int m_starting_index = 0;
+    int m_label_tour_length = 0;
+    int m_max_y = 0;
+    int m_max_x = 0;
     Ui::MainWindow *ui;
 
 };

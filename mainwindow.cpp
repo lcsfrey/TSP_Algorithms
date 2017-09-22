@@ -24,9 +24,9 @@
 **                                                                                 **
 ************************************************************************************/
 
-
 #include <string>
 #include <vector>
+#include <ctime>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -38,13 +38,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->file_status->setText(QString("Current file: None"));
     m_vertices = nullptr;
+    srand(time(0));
 }
 
 MainWindow::~MainWindow() {
     delete ui;
-}
-
-void MainWindow::paintEvent(QPaintEvent *e) {
 }
 
 void MainWindow::resetGraph(QCustomPlot *customPlot) {
@@ -125,6 +123,66 @@ void MainWindow::on_button_draw_clicked() {
     ui->customPlot->replot();
 }
 
+void MainWindow::displayPrim() {
+    QString status_label("Calculating Prim's Minimum Spanning Tree...");
+    ui->m_label_algorithm->setText(status_label);
+    ui->customPlot->replot();
+
+    std::vector<int> mst = m_graph->getPrimMST();
+    drawPrimLines(ui->customPlot, *m_vertices, mst);
+
+    status_label = "Showing Prim's Minimum Spanning Tree";
+    ui->m_label_algorithm->setText(status_label);
+}
+
+void MainWindow::displayDijkstras() {
+    QString status_label("Calculating Dijktra's Shortest Path...");
+    ui->m_label_algorithm->setText(status_label);
+    ui->customPlot->replot();
+
+    std::vector<int> dijkstra_path = m_graph->getDijkstraPath(m_starting_index);
+    drawPrimLines(ui->customPlot, *m_vertices, dijkstra_path);
+
+    status_label = "Showing Dijkstra's Shortest Path";
+    ui->m_label_algorithm->setText(status_label);
+}
+
+void MainWindow::displayNearestNeighbor() {
+    QString status_label("Calculating Nearest Neighbors Tour...");
+    ui->m_label_algorithm->setText(status_label);
+    ui->customPlot->replot();
+
+    TSP_Algos::TSP_Algo_Nearest_Neighbors algo_nn(m_graph);
+    algo_nn.findPath(m_starting_index);
+    m_tour = algo_nn.getRoute();
+    drawTourLines(ui->customPlot, *m_vertices, m_tour);
+
+    std::string str_tour_length(std::to_string(algo_nn.getRouteLength()));
+    QString q_str_tour_length(str_tour_length.c_str());
+    ui->m_label_tour_length->setText(q_str_tour_length);
+    status_label = "Showing Nearest Neighbors Tour";
+    ui->m_label_algorithm->setText(status_label);
+}
+
+void MainWindow::displayTwoOpt() {
+    QString status_label("Calculating 2-Optimal Tour...");
+    ui->m_label_algorithm->setText(status_label);
+    ui->customPlot->replot();
+
+    TSP_Algos::TSP_Algo_Nearest_Neighbors algo_nn(m_graph);
+    algo_nn.findPath(m_starting_index);
+    algo_nn.twoOpt();
+    m_tour = algo_nn.getRoute();
+    drawTourLines(ui->customPlot, *m_vertices, m_tour);
+
+    ui->m_label_tour_length->setText(QString(algo_nn.getRouteLength()));
+    std::string str_tour(std::to_string(algo_nn.getRouteLength()));
+    QString t_q_string(str_tour.c_str());
+    ui->m_label_tour_length->setText(t_q_string);
+    status_label = "Showing 2-Optimal Tour";
+    ui->m_label_algorithm->setText(status_label);
+}
+
 void MainWindow::drawTourLines(QCustomPlot *customPlot,
                    std::vector<Vertex> vertices,
                    std::vector<int> connections) {
@@ -196,19 +254,19 @@ void MainWindow::on_button_load_vertices_clicked() {
     m_graph = new Graph(file_name);
     m_vertices = &m_graph->getVertices();
 
-    int max_x = 0;
-    int max_y = 0;
+    m_max_x = 0;
+    m_max_y = 0;
     for (auto vertex : *m_vertices) {
         int x = vertex.getX();
         int y = vertex.getY();
-        if (max_x < x)
-            max_x = x;
-        if (max_y < y)
-            max_y = y;
+        if (m_max_x < x)
+            m_max_x = x;
+        if (m_max_y < y)
+            m_max_y = y;
     }
 
-    ui->customPlot->xAxis->setRange(0, max_x+50);
-    ui->customPlot->yAxis->setRange(0, max_y+50);
+    ui->customPlot->xAxis->setRange(0, m_max_x+50);
+    ui->customPlot->yAxis->setRange(0, m_max_y+50);
     drawPoints(ui->customPlot, m_vertices);
 
     QString t_q_string("");
@@ -232,62 +290,13 @@ void MainWindow::on_spinBox_editingFinished() {
     m_starting_index = ui->spinBox->value();
 }
 
-void MainWindow::displayPrim() {
-    QString status_label("Calculating Prim's Minimum Spanning Tree...");
-    ui->m_label_algorithm->setText(status_label);
+void MainWindow::on_m_button_random_add_vertices_clicked() {
+    int current_size = m_graph->getNumVertices();
+    int total = current_size + ui->m_spinbox_random_vertices_to_add->value();
+    for (int i = current_size; i < total; i++) {
+        m_graph->addVertex(i, rand() % m_max_x, rand() % m_max_y);
+    }
+    m_vertices = &m_graph->getVertices();
+    drawPoints(ui->customPlot, m_vertices);
     ui->customPlot->replot();
-
-    std::vector<int> mst = m_graph->getPrimMST();
-    drawPrimLines(ui->customPlot, *m_vertices, mst);
-
-    status_label = "Showing Prim's Minimum Spanning Tree";
-    ui->m_label_algorithm->setText(status_label);
-}
-
-void MainWindow::displayDijkstras() {
-    QString status_label("Calculating Dijktra's Shortest Path...");
-    ui->m_label_algorithm->setText(status_label);
-    ui->customPlot->replot();
-
-    std::vector<int> dijkstra_path = m_graph->getDijkstraPath(m_starting_index);
-    drawPrimLines(ui->customPlot, *m_vertices, dijkstra_path);
-
-    status_label = "Showing Dijkstra's Shortest Path";
-    ui->m_label_algorithm->setText(status_label);
-}
-
-void MainWindow::displayNearestNeighbor() {
-    QString status_label("Calculating Nearest Neighbors Tour...");
-    ui->m_label_algorithm->setText(status_label);
-    ui->customPlot->replot();
-
-    TSP_Algos::TSP_Algo_Nearest_Neighbors algo_nn(m_graph);
-    algo_nn.findPath(m_starting_index);
-    m_tour = algo_nn.getRoute();
-    drawTourLines(ui->customPlot, *m_vertices, m_tour);
-
-    std::string str_tour_length(std::to_string(algo_nn.getRouteLength()));
-    QString q_str_tour_length(str_tour_length.c_str());
-    ui->m_label_tour_length->setText(q_str_tour_length);
-    status_label = "Showing Nearest Neighbors Tour";
-    ui->m_label_algorithm->setText(status_label);
-}
-
-void MainWindow::displayTwoOpt() {
-    QString status_label("Calculating 2-Optimal Tour...");
-    ui->m_label_algorithm->setText(status_label);
-    ui->customPlot->replot();
-
-    TSP_Algos::TSP_Algo_Nearest_Neighbors algo_nn(m_graph);
-    algo_nn.findPath(m_starting_index);
-    algo_nn.twoOpt();
-    m_tour = algo_nn.getRoute();
-    drawTourLines(ui->customPlot, *m_vertices, m_tour);
-
-    ui->m_label_tour_length->setText(QString(algo_nn.getRouteLength()));
-    std::string str_tour(std::to_string(algo_nn.getRouteLength()));
-    QString t_q_string(str_tour.c_str());
-    ui->m_label_tour_length->setText(t_q_string);
-    status_label = "Showing 2-Optimal Tour";
-    ui->m_label_algorithm->setText(status_label);
 }
