@@ -45,6 +45,10 @@ class TSP_Algo_Nearest_Neighbors {
     // calculates the 2-optimal tour
     // m_simple_tour must already have an initial route
     void twoOpt();
+
+    // calculates the 2-optimal tour
+    // m_simple_tour must already have an initial route
+    // work done by method is divided between four threads
     void threadedTwoOpt();
 
     inline std::vector<int> getRoute() const { return m_simple_route; }
@@ -63,19 +67,22 @@ class TSP_Algo_Nearest_Neighbors {
                           const int &i,
                           const int &k,
                           const int &size) const;
-
+    // findBestChange is used by twoOpt and threadedTwoOpt methods to find the best
+    // improvement over an interval. The result is stored as a tuple in
+    // change_list[list_position] where the first int is the best improvement,
+    // (the smallest value of change found) the second and third ints are the indeces
+    // in current_route that will be manipulated by twoOpt and threadedTwoOpt.
     void findBestChange(const std::vector<int> &current_route,
                         std::vector<std::tuple<int, int, int> > &change_list,
                         const int &list_position,
-                        const int &index_i,
+                        const int &starting_index,
                         const int &size,
                         const int &interval) const;
-    int m_route_length = 0;
+    int m_route_length;
     const std::vector<Vertex>* m_vertices;
     std::vector<int> m_simple_route;
     const Graph* m_graph;
 };
-
 
 }  // namespace TSP_Algos
 
