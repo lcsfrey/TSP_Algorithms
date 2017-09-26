@@ -26,20 +26,21 @@
 #include "graph.h"
 
 // Graph Implementations
-Graph::Graph(std::string file_name) {
+Graph::Graph(std::string file_name) : size(0) {
     readFromFile(file_name);
     m_vertices.shrink_to_fit();
     printf("Total vertices: %d\n", size);
 }
 
-Graph::Graph(const std::vector<std::pair<int, int> > &coords) {
-    int size = coords.size();
+Graph::Graph(const std::vector<std::pair<int, int> > &coords) : size(coords.size()) {
     for (int i = 0; i < size; i++) {
         addVertex(i, coords[i].first, coords[i].second);
     }
 }
 
-void Graph::addVertex(const int &t_vertex_id, const int &t_vertex_x, const int &t_vertex_y) {
+void Graph::addVertex(const int &t_vertex_id,
+                      const int &t_vertex_x,
+                      const int &t_vertex_y) {
     Vertex t_vertex(t_vertex_x, t_vertex_y, t_vertex_id);
     addVertex(t_vertex);
 }
@@ -66,12 +67,12 @@ int Graph::getEdgeWeight(const int& t_from, const int& t_to) const {
     return from_vertex->out_edges[t_to].getWeight();
 }
 
-Vertex Graph::getVertex(const int &id) {
-    return m_vertices.at(id);
+const Vertex *Graph::getVertex(const int &id) {
+    return &m_vertices.at(id);
 }
 
-std::vector<Vertex>& Graph::getVertices() {
-    return m_vertices;
+const std::vector<Vertex> *Graph::getVertices() const {
+    return &m_vertices;
 }
 
 std::vector<int> Graph::getPrimMST() {
@@ -115,7 +116,7 @@ std::vector<int> Graph::getDijkstraPath(int starting_index) {
 
     distance[starting_index] = 0;
     parent[starting_index] = starting_index;
-    for (int count = 0; count < size - 1; count++){
+    for (int count = 0; count < size - 1; count++) {
         int min = INT32_MAX;
         int min_index = 0;
         for (int i = 0; i < size; i++) {
@@ -126,7 +127,7 @@ std::vector<int> Graph::getDijkstraPath(int starting_index) {
         }
         inPath[min_index] = true;
         for (int i = 0; i < size; i++) {
-            if(!inPath[i] && distance[min_index] + getEdgeWeight(min_index, i) < distance[i]) {
+            if (!inPath[i] && distance[min_index] + getEdgeWeight(min_index, i) < distance[i]) {
                 parent[i] = min_index;
                 distance[i] = distance[min_index] + getEdgeWeight(min_index, i);
             }
@@ -135,7 +136,7 @@ std::vector<int> Graph::getDijkstraPath(int starting_index) {
     return parent;
 }
 
-int Graph::calcPathLength(const std::vector<int> &t_route) {
+int Graph::calcPathLength(const std::vector<int> &t_route) const {
     int t_total_length = 0;
     int size = t_route.size() - 1;
     for (int i = 0; i < size - 1; i++) {
@@ -172,21 +173,31 @@ void Graph::readFromFile(std::string file_name) {
 }
 
 // Vertex Implementations
+Vertex::Vertex(const int &t_x,
+               const int &t_y,
+               const int &t_id) : x(t_x), y(t_y), id(t_id) {}
+
 void Vertex::addEdge(const Vertex &other_vertex) {
     out_edges.push_back(Edge(*this, other_vertex));
 }
 
 // Edge implementations
 int Edge::calculateWeight(const Vertex &t_from, const Vertex &t_to) {
-        int t_weight = -1;
-        if (t_from.id != t_to.id) {
-            float t_number = sqrt(pow((t_from.y - t_to.y), 2) + pow((t_from.x - t_to.x), 2));
-            t_weight = round(t_number);
-        } else {
-            t_weight = 0;
-        }
-        return t_weight;
+    int t_weight = -1;
+    if (t_from.id != t_to.id) {
+        float t_number = sqrt(pow((t_from.y - t_to.y), 2) + pow((t_from.x - t_to.x), 2));
+        t_weight = round(t_number);
+    } else {
+        t_weight = 0;
+    }
+    return t_weight;
 }
+
+Edge::Edge(const Vertex &t_from, const Vertex &t_to)
+    : to(t_to.id), weight(calculateWeight(t_from, t_to)) {}
+
+Edge::Edge(const int &t_to, const int &t_weight)
+    : to(t_to) , weight(t_weight) {}
 
 bool Edge::operator> (const Edge &other_edge) const {
     return (this->weight > other_edge.weight);
