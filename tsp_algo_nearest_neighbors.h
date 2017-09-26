@@ -29,6 +29,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <tuple>
 
 #include "graph.h"
 
@@ -44,6 +45,7 @@ class TSP_Algo_Nearest_Neighbors {
     // calculates the 2-optimal tour
     // m_simple_tour must already have an initial route
     void twoOpt();
+    void threadedTwoOpt();
 
     inline std::vector<int> getRoute() const { return m_simple_route; }
     inline int getRouteLength() const { return m_route_length; }
@@ -62,6 +64,12 @@ class TSP_Algo_Nearest_Neighbors {
                           const int &k,
                           const int &size) const;
 
+    void findBestChange(const std::vector<int> &current_route,
+                        std::vector<std::tuple<int, int, int> > &change_list,
+                        const int &list_position,
+                        const int &index_i,
+                        const int &size,
+                        const int &interval) const;
     int m_route_length = 0;
     const std::vector<Vertex>* m_vertices;
     std::vector<int> m_simple_route;

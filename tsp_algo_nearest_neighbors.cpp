@@ -24,21 +24,26 @@
 ************************************************************************************/
 
 #include "tsp_algo_nearest_neighbors.h"
+#include <thread>
+#include <vector>
+#include <tuple>
+
+class TSP_Algo_Nearest_Neighbors;
+using TSP_Algo_NN = TSP_Algos::TSP_Algo_Nearest_Neighbors;
 
 namespace TSP_Algos {
 
-TSP_Algo_Nearest_Neighbors::TSP_Algo_Nearest_Neighbors(Graph *t_graph)
-    : m_graph(t_graph), m_vertices(m_graph->getVertices()) {}
-
+TSP_Algo_NN::TSP_Algo_Nearest_Neighbors(Graph *t_graph)
+    : m_graph(t_graph), m_vertices(t_graph->getVertices()) {}
 // calculates the nearest neighbor tour starting at starting_index
-void TSP_Algo_Nearest_Neighbors::findPath(int starting_index) {
+void TSP_Algo_NN::findPath(int starting_index) {
     printf("Finding nearest neighbor route...\n");
     auto start = std::chrono::high_resolution_clock::now();
     int size = m_vertices->size();
     int t_total_route_length = 0;
 
     // record of which vertices are in the route
-    std::vector<bool> inRoute(m_vertices->size(), false);
+    std::vector<bool> inRoute(size, false);
 
     // record of current route
     std::vector<int> t_simple_route(size);
@@ -80,7 +85,7 @@ void TSP_Algo_Nearest_Neighbors::findPath(int starting_index) {
 }
 
 // calculates the 2-Optimal tour
-void TSP_Algo_Nearest_Neighbors::twoOpt() {
+void TSP_Algo_NN::twoOpt() {
     printf("Finding 2-optimal route...\n");
     auto start = std::chrono::high_resolution_clock::now();
     auto finish = std::chrono::high_resolution_clock::now();
@@ -143,13 +148,132 @@ void TSP_Algo_Nearest_Neighbors::twoOpt() {
     printf("----------------------------------------\n");
 }
 
+void TSP_Algo_NN::threadedTwoOpt() {
+    printf("Finding 2-optimal route...\n");
+    auto start = std::chrono::high_resolution_clock::now();
+    auto finish = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed;
+
+    int old_length = this->m_route_length;
+    int current_length = this->m_route_length;
+    std::vector<int> current_route(this->m_simple_route);
+    int size = m_simple_route.size();
+    int interval = size / 4;
+    int iterations = 0;
+
+    do {
+        // initialize loop variables
+        int min_change = INT32_MAX;
+        int min_i = -1;
+        int min_k = -1;
+        std::vector<std::tuple<int, int, int>> change_list(4, std::tuple<int, int, int>(INT32_MAX, -1, -1));
+        old_length = current_length;
+        iterations++;
+        // loop through every pair of edges in the current path
+        std::thread t1(&TSP_Algo_NN::findBestChange,
+                       this,
+                       current_route,
+                       std::ref(change_list),
+                       0,
+                       0,
+                       size,
+                       interval);
+        std::thread t2(&TSP_Algo_NN::findBestChange,
+                       this,
+                       current_route,
+                       std::ref(change_list),
+                       1,
+                       interval,
+                       size,
+                       2*interval);
+        std::thread t3(&TSP_Algo_NN::findBestChange,
+                       this,
+                       current_route,
+                       std::ref(change_list),
+                       2,
+                       2*interval,
+                       size,
+                       3*interval);
+        std::thread t4(&TSP_Algo_NN::findBestChange,
+                       this,
+                       current_route,
+                       std::ref(change_list),
+                       3,
+                       3*interval,
+                       size,
+                       size-2);
+        t1.join();
+        t2.join();
+        t3.join();
+        t4.join();
+        for (int i = 0; i < 4; i++) {
+            if (std::get<0>(change_list.at(i)) < min_change) {
+                min_change = std::get<0>(change_list.at(i));
+                min_i = std::get<1>(change_list.at(i));
+                min_k = std::get<2>(change_list.at(i));
+            }
+        }
+        // reverse order of route between two indices if an improvement is found
+        if (min_i != -1) {
+            current_length += min_change;
+            std::vector<int>::iterator t_end = current_route.begin() + min_k;
+            std::reverse(current_route.begin() + min_i+1, t_end);
+        }
+        // report time and length of every 25th iteration
+        finish = std::chrono::high_resolution_clock::now();
+        if (iterations % 25 == 0) {
+            elapsed = finish - start;
+            printf("%d iterations took: %f seconds\n", iterations, elapsed.count());
+            printf("Current route length: %d\n", current_length);
+            printf("----------------------------------------\n");
+        }
+    // repeat for 1500 iterations or until the length hasn't changed between iterations
+    } while (iterations <= 1500 && old_length != current_length);
+
+    this->m_simple_route = current_route;
+    this->m_route_length = current_length;
+
+    finish = std::chrono::high_resolution_clock::now();
+    elapsed = finish - start;
+    printf("2-optimal took: %f seconds\n", elapsed.count());
+    printf("Final length: %d\n", m_route_length);
+    printf("----------------------------------------\n");
+}
+
+void TSP_Algo_NN::findBestChange(const std::vector<int> &current_route,
+                                 std::vector<std::tuple<int, int, int>> &change_list,
+                                 const int &list_position,
+                                 const int &index_i,
+                                 const int &size,
+                                 const int &interval) const {
+  int min_k = -1;
+  int min_i = -1;
+  int change = INT32_MAX;
+  int min_change = 0;
+  for (int i = index_i; i < interval; i+=4) {
+      for (int k = i+2; k < size; k++) {
+          change = calcChangeOfEdges(current_route, i, k, size);
+          // check if the weight of the new edges is less than the weight of the old edges
+          if (change < min_change) {
+              min_change = change;
+              min_k = k+1;
+              min_i = i;
+          }
+      }
+  }
+  if (min_k != -1) {
+    std::tuple<int, int, int> best_change(min_change, min_i, min_k);
+    change_list[list_position] = best_change;
+  }
+}
+
 // returns the difference between the sum of the weights of two pairs of edges
 // first pair of edges connect i to i+1 and k to k+1 in the route
 // second pair of edges connect i to k and i+1 to k+1 in the route
-int TSP_Algo_Nearest_Neighbors::calcChangeOfEdges(const std::vector<int> &current_route,
-                                                  const int &i,
-                                                  const int &k,
-                                                  const int& size) const {
+int TSP_Algo_NN::calcChangeOfEdges(const std::vector<int> &current_route,
+                                   const int &i,
+                                   const int &k,
+                                   const int& size) const {
     int old_edge_1_weight = m_graph->getEdgeWeight(current_route[i], current_route[i+1]);
     int new_edge_1_weight = m_graph->getEdgeWeight(current_route[i], current_route[k]);
     int old_edge_2_weight = 0;
@@ -161,13 +285,13 @@ int TSP_Algo_Nearest_Neighbors::calcChangeOfEdges(const std::vector<int> &curren
         old_edge_2_weight = m_graph->getEdgeWeight(current_route[k], current_route[0]);
         new_edge_2_weight = m_graph->getEdgeWeight(current_route[i+1], current_route[0]);
     }
-    return new_edge_1_weight + new_edge_2_weight - old_edge_1_weight - old_edge_2_weight;
+    return new_edge_1_weight + new_edge_2_weight - old_edge_1_weight - old_edge_2_weight;;
 }
 
 // outputs file with the same name as the input file appended with ".tour"
 // first line is the length of the tour
 // subsequent lines the IDs of the vertices in the order they are visited
-void TSP_Algo_Nearest_Neighbors::writeToFile(std::string file_name) {
+void TSP_Algo_NN::writeToFile(std::string file_name) {
     file_name += ".tour";
     std::ofstream file(file_name);
     std::cout << "Writing tour to file: " << file_name <<
@@ -180,4 +304,4 @@ void TSP_Algo_Nearest_Neighbors::writeToFile(std::string file_name) {
     file.close();
 }
 
-}
+}  // namespace TSP_Algos
