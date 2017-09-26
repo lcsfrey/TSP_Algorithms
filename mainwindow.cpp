@@ -129,7 +129,7 @@ void MainWindow::displayPrim() {
     ui->customPlot->replot();
 
     std::vector<int> mst = m_graph->getPrimMST();
-    drawPrimLines(ui->customPlot, *m_vertices, mst);
+    drawPrimLines(ui->customPlot, m_vertices, mst);
 
     status_label = "Showing Prim's Minimum Spanning Tree";
     ui->m_label_algorithm->setText(status_label);
@@ -141,7 +141,7 @@ void MainWindow::displayDijkstras() {
     ui->customPlot->replot();
 
     std::vector<int> dijkstra_path = m_graph->getDijkstraPath(m_starting_index);
-    drawPrimLines(ui->customPlot, *m_vertices, dijkstra_path);
+    drawPrimLines(ui->customPlot, m_vertices, dijkstra_path);
 
     status_label = "Showing Dijkstra's Shortest Path";
     ui->m_label_algorithm->setText(status_label);
@@ -155,7 +155,7 @@ void MainWindow::displayNearestNeighbor() {
     TSP_Algos::TSP_Algo_Nearest_Neighbors algo_nn(m_graph);
     algo_nn.findPath(m_starting_index);
     m_tour = algo_nn.getRoute();
-    drawTourLines(ui->customPlot, *m_vertices, m_tour);
+    drawTourLines(ui->customPlot, m_vertices, m_tour);
 
     std::string str_tour_length(std::to_string(algo_nn.getRouteLength()));
     QString q_str_tour_length(str_tour_length.c_str());
@@ -173,7 +173,7 @@ void MainWindow::displayTwoOpt() {
     algo_nn.findPath(m_starting_index);
     algo_nn.twoOpt();
     m_tour = algo_nn.getRoute();
-    drawTourLines(ui->customPlot, *m_vertices, m_tour);
+    drawTourLines(ui->customPlot, m_vertices, m_tour);
 
     ui->m_label_tour_length->setText(QString(algo_nn.getRouteLength()));
     std::string str_tour(std::to_string(algo_nn.getRouteLength()));
@@ -183,26 +183,26 @@ void MainWindow::displayTwoOpt() {
     ui->m_label_algorithm->setText(status_label);
 }
 
-void MainWindow::drawTourLines(QCustomPlot *customPlot,
-                   std::vector<Vertex> vertices,
-                   std::vector<int> connections) {
+void MainWindow::drawTourLines(QCustomPlot* customPlot,
+                               const std::vector<Vertex>* vertices,
+                               std::vector<int> connections) {
     int size = connections.size() - 1;
     for (int i = 0; i < size; i++) {
-        int parent_x = vertices[connections[i]].getX();
-        int parent_y = vertices[connections[i]].getY();
+        int parent_x = vertices->at(connections[i]).getX();
+        int parent_y = vertices->at(connections[i]).getY();
 
-        int child_x = vertices[connections[i+1]].getX();
-        int child_y = vertices[connections[i+1]].getY();
+        int child_x = vertices->at(connections[i+1]).getX();
+        int child_y = vertices->at(connections[i+1]).getY();
         QCPItemLine *line = new QCPItemLine(customPlot);
         line->setPen(QPen(Qt::blue));
         line->start->setCoords(parent_x, parent_y + 20);
         line->end->setCoords(child_x, child_y + 20);
     }
-    int parent_x = vertices[connections[size]].getX();
-    int parent_y = vertices[connections[size]].getY();
+    int parent_x = vertices->at(connections[size]).getX();
+    int parent_y = vertices->at(connections[size]).getY();
 
-    int child_x = vertices[connections[0]].getX();
-    int child_y = vertices[connections[0]].getY();
+    int child_x = vertices->at(connections[0]).getX();
+    int child_y = vertices->at(connections[0]).getY();
     QCPItemLine *line = new QCPItemLine(customPlot);
     line->setPen(QPen(Qt::blue));
     line->start->setCoords(parent_x, parent_y + 20);
@@ -210,11 +210,11 @@ void MainWindow::drawTourLines(QCustomPlot *customPlot,
 }
 
 void MainWindow::drawPrimLines(QCustomPlot *customPlot,
-                   std::vector<Vertex> vertices,
+                   const std::vector<Vertex>* vertices,
                    std::vector<int> connections) {
-    for (auto vertex : vertices) {
-        int parent_x = vertices[connections[vertex.getID()]].getX();
-        int parent_y = vertices[connections[vertex.getID()]].getY();
+    for (auto vertex : *vertices) {
+        int parent_x = vertices->at(connections[vertex.getID()]).getX();
+        int parent_y = vertices->at(connections[vertex.getID()]).getY();
 
         int child_x = vertex.getX();
         int child_y = vertex.getY();
@@ -225,7 +225,8 @@ void MainWindow::drawPrimLines(QCustomPlot *customPlot,
     }
 }
 
-void MainWindow::drawPoints(QCustomPlot *customPlot, std::vector<Vertex> *vertices) {
+void MainWindow::drawPoints(QCustomPlot *customPlot,
+                            const std::vector<Vertex> *vertices) {
     if (vertices == nullptr) return;
 
     for (auto vertex : *vertices) {
@@ -252,7 +253,7 @@ void MainWindow::on_button_load_vertices_clicked() {
         delete m_graph;
     }
     m_graph = new Graph(file_name);
-    m_vertices = &m_graph->getVertices();
+    m_vertices = m_graph->getVertices();
 
     m_max_x = 0;
     m_max_y = 0;
@@ -296,7 +297,7 @@ void MainWindow::on_m_button_random_add_vertices_clicked() {
     for (int i = current_size; i < total; i++) {
         m_graph->addVertex(i, rand() % m_max_x, rand() % m_max_y);
     }
-    m_vertices = &m_graph->getVertices();
+    m_vertices = m_graph->getVertices();
     drawPoints(ui->customPlot, m_vertices);
     ui->customPlot->replot();
 }

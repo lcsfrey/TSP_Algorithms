@@ -11,32 +11,31 @@ namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
     Q_OBJECT
 
-public:
+ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-protected:
+ protected:
     // draws traveling salesman approximation lines
-    void drawTourLines(QCustomPlot *customPlot,
-                       std::vector<Vertex> vertices,
+    void drawTourLines(QCustomPlot* customPlot,
+                       const std::vector<Vertex>* vertices,
                        std::vector<int> connections);
 
     // draws minimum spanning tree lines
-    void drawPrimLines(QCustomPlot *customPlot,
-                       std::vector<Vertex> vertices,
+    void drawPrimLines(QCustomPlot* customPlot,
+                       const std::vector<Vertex> *vertices,
                        std::vector<int> connections);
 
     // draws vertices on graph
-    void drawPoints(QCustomPlot *customPlot,
-                    std::vector<Vertex> *vertices);
+    void drawPoints(QCustomPlot* customPlot,
+                    const std::vector<Vertex> *vertices);
 
     // deletes all drawn lines and vertices from graph
     // reinitializes drawing properties
-    void resetGraph(QCustomPlot *customPlot);
+    void resetGraph(QCustomPlot* customPlot);
 
     void displayPrim();
     void displayDijkstras();
@@ -62,9 +61,9 @@ private slots:
 
     void on_m_button_random_add_vertices_clicked();
 
-    private:
+ private:
     Graph* m_graph = nullptr;
-    std::vector<Vertex>* m_vertices = nullptr;
+    const std::vector<Vertex>* m_vertices = nullptr;
     std::vector<int> m_tour;
     int m_line_choice = 0;
     int m_starting_index = 0;
