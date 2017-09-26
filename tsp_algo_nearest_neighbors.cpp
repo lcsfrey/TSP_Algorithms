@@ -27,6 +27,9 @@
 
 namespace TSP_Algos {
 
+TSP_Algo_Nearest_Neighbors::TSP_Algo_Nearest_Neighbors(Graph *t_graph)
+    : m_graph(t_graph), m_vertices(m_graph->getVertices()) {}
+
 // calculates the nearest neighbor tour starting at starting_index
 void TSP_Algo_Nearest_Neighbors::findPath(int starting_index) {
     printf("Finding nearest neighbor route...\n");
@@ -143,7 +146,10 @@ void TSP_Algo_Nearest_Neighbors::twoOpt() {
 // returns the difference between the sum of the weights of two pairs of edges
 // first pair of edges connect i to i+1 and k to k+1 in the route
 // second pair of edges connect i to k and i+1 to k+1 in the route
-int TSP_Algo_Nearest_Neighbors::calcChangeOfEdges(const std::vector<int> current_route, const int &i, const int &k, const int& size) {
+int TSP_Algo_Nearest_Neighbors::calcChangeOfEdges(const std::vector<int> &current_route,
+                                                  const int &i,
+                                                  const int &k,
+                                                  const int& size) const {
     int old_edge_1_weight = m_graph->getEdgeWeight(current_route[i], current_route[i+1]);
     int new_edge_1_weight = m_graph->getEdgeWeight(current_route[i], current_route[k]);
     int old_edge_2_weight = 0;

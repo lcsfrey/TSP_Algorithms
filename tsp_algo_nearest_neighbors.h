@@ -36,9 +36,7 @@ namespace TSP_Algos {
 
 class TSP_Algo_Nearest_Neighbors {
  public:
-    explicit TSP_Algo_Nearest_Neighbors(Graph* t_graph) : m_graph(t_graph) {
-        m_vertices = &(m_graph->getVertices());
-    }
+    explicit TSP_Algo_Nearest_Neighbors(Graph* t_graph);
 
     // calculates the nearest neighbor tour starting at starting_index
     void findPath(int starting_index = 0);
@@ -59,12 +57,15 @@ class TSP_Algo_Nearest_Neighbors {
     // returns the difference between the sum of the weights of two pairs of edges
     // first pair of edges connect i to i+1 and k to k+1 in the route
     // second pair of edges connect i to k and i+1 to k+1 in the route
-    int calcChangeOfEdges(const std::vector<int> current_route, const int& i, const int& k, const int &size);
+    int calcChangeOfEdges(const std::vector<int> &current_route,
+                          const int &i,
+                          const int &k,
+                          const int &size) const;
 
     int m_route_length = 0;
-    std::vector<Vertex>* m_vertices;
+    const std::vector<Vertex>* m_vertices;
     std::vector<int> m_simple_route;
-    Graph* m_graph;
+    const Graph* m_graph;
 };
 
 
