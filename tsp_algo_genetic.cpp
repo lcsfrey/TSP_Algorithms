@@ -1,21 +1,30 @@
 #include "tsp_algo_genetic.h"
 #include "tsp_algo_nearest_neighbors.h"
 #include <iostream>
+#include <iomanip>
+#include <chrono>
 
-namespace TSP_Algos {
+class TSP_Algo_Genetic;
+using TSP_Algo_G = TSP_Algos::TSP_Algo_Genetic;
 
-TSP_Algo_Genetic::TSP_Algo_Genetic(Graph *t_graph, int &Chromosome_size) : m_graph(t_graph) {
+// used to access current time
+using Time = std::chrono::high_resolution_clock;
+
+TSP_Algo_G::TSP_Algo_Genetic(Graph *t_graph,
+                             const int &Chromosome_size) : m_graph(t_graph),
+                                                           m_vertices(t_graph->getVertices()) {
+
     srand(time(0));
-    m_vertices = new std::vector<Vertex>(m_graph->getVertices());
     m_best_fitness = INT32_MAX;
     m_last_fitness = 0;
     m_mutation_probability = .25;
-    std::priority_queue<Chromosome, std::vector<Chromosome>, std::greater<Chromosome>> temp_heap;
+    ChromosomeHeap temp_heap;
 
     // creates random Chromosomes and stores the best Chromosomes in min heap
     std::vector<int> t_route(m_vertices->size());
     std::iota(t_route.begin(), t_route.end(), 0);
-    for(int i = 0; i < 30000; i++) {
+    int random_pop_size = Chromosome_size * 2;
+    for(int i = 0; i < random_pop_size; i++) {
         std::shuffle(t_route.begin(), t_route.end(), std::mt19937{std::random_device{}()});
         temp_heap.push(Chromosome(t_graph, t_route));
     }
@@ -26,20 +35,20 @@ TSP_Algo_Genetic::TSP_Algo_Genetic(Graph *t_graph, int &Chromosome_size) : m_gra
     }
 }
 
-int TSP_Algo_Genetic::getCurrentFitness() const{
+int TSP_Algo_G::getCurrentFitness() const{
     return this->m_best_fitness;
 }
 
-double TSP_Algo_Genetic::getMutationProbability() const {
+double TSP_Algo_G::getMutationProbability() const {
     return this->m_mutation_probability;
 }
 
-std::vector<int> TSP_Algo_Genetic::getRoute() const {
+std::vector<int> TSP_Algo_G::getRoute() const {
     return this->m_chromosome_heap.top().m_route;
 }
 
-void TSP_Algo_Genetic::tick(){
-    std::priority_queue<Chromosome, std::vector<Chromosome>, std::greater<Chromosome>> temp_chromosome_heap;
+void TSP_Algo_G::tick(){
+    ChromosomeHeap temp_chromosome_heap;
     Chromosome best_chromosome = m_chromosome_heap.top();
     temp_chromosome_heap.push(best_chromosome);
     int iterations = m_chromosome_heap.size() / 4;
@@ -55,6 +64,7 @@ void TSP_Algo_Genetic::tick(){
         m_chromosome_heap.pop();
         Chromosome parent_4 = m_chromosome_heap.top();
         m_chromosome_heap.pop();
+
         int i = interval;
         while (iterations > 0 && i > 0) {
             temp_chromosome_heap.push(reproduce(parent_1, parent_2));
@@ -68,6 +78,7 @@ void TSP_Algo_Genetic::tick(){
     }
     m_chromosome_heap = temp_chromosome_heap;
     int current_fitness = m_chromosome_heap.top().m_route_fitness;
+
     if (m_best_fitness == current_fitness) {
         if (m_mutation_probability < .75) {
             m_mutation_probability += .005;
@@ -83,7 +94,29 @@ void TSP_Algo_Genetic::tick(){
     }
 }
 
-TSP_Algo_Genetic::Chromosome TSP_Algo_Genetic::reproduce(const TSP_Algo_Genetic::Chromosome &parent_1, const TSP_Algo_Genetic::Chromosome &parent_2) const {
+void TSP_Algo_G::run(const int &num_generations) {
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    auto finish = start_time;
+    std::chrono::duration<double> elapsed = finish - start_time;
+
+    for (int i = 0; i < num_generations; i++) {
+        tick();
+        if (i % 25 == 0) {
+            finish = Time::now();
+            elapsed = finish - start_time;
+            std::cout << std::setprecision(2) << std::fixed
+                      << "Gen " << i
+                      << " | Time: " << elapsed.count() << " seconds"
+                      << " | Fitness: " << getCurrentFitness()
+                      << " | Mutation Rate: " << getMutationProbability()
+                      << std::endl;
+        }
+    }
+}
+
+TSP_Algo_G::Chromosome TSP_Algo_G::reproduce(const TSP_Algo_G::Chromosome &parent_1,
+                                             const TSP_Algo_G::Chromosome &parent_2) const {
     int size = m_vertices->size();
     int size_from_parent_1 = rand() % size;
     int offset_from_parent_1 = rand() % (size - size_from_parent_1);
@@ -104,20 +137,21 @@ TSP_Algo_Genetic::Chromosome TSP_Algo_Genetic::reproduce(const TSP_Algo_Genetic:
     return child_chromosome;
 }
 
-TSP_Algo_Genetic::Chromosome::Chromosome(const Graph *t_graph, const std::vector<int> &t_route) : m_route(t_route) {
-    m_route_fitness = t_graph->calcPathLength(m_route);
+TSP_Algo_G::Chromosome::Chromosome(const Graph *graph,
+                                         const std::vector<int> &route) : m_route(route) {
+    m_route_fitness = graph->calcPathLength(m_route);
 }
 
-void TSP_Algo_Genetic::Chromosome::mutate(double t_probability) {
-    if((double) rand() / RAND_MAX <= t_probability) {
+void TSP_Algo_G::Chromosome::mutate(double probability) {
+    if((double) rand() / RAND_MAX <= probability) {
         int size = m_route.size();
         std::swap(m_route[rand() % size], m_route[rand() % size]);
-        mutate(t_probability - .005);
+        mutate(probability - .005);
     }
 }
 
-bool TSP_Algo_Genetic::Chromosome::operator >(const Chromosome& other_chromosome) const{
+
+bool TSP_Algo_G::Chromosome::operator >(const Chromosome& other_chromosome) const{
     return m_route_fitness > other_chromosome.m_route_fitness;
 }
 
-}
