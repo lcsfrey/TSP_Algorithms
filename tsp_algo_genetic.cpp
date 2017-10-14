@@ -11,28 +11,33 @@ using TSP_Algo_G = TSP_Algos::TSP_Algo_Genetic;
 using Time = std::chrono::high_resolution_clock;
 
 TSP_Algo_G::TSP_Algo_Genetic(Graph *t_graph,
-                             const int &Chromosome_size) : m_graph(t_graph),
-                                                           m_vertices(t_graph->getVertices()) {
+                             int population_size) : m_graph(t_graph),
+                                                    m_vertices(t_graph->getVertices()) {
 
     srand(time(0));
     m_best_fitness = INT32_MAX;
     m_last_fitness = 0;
     m_mutation_probability = .25;
+    m_population_size = population_size;
     ChromosomeHeap temp_heap;
 
     // creates random Chromosomes and stores the best Chromosomes in min heap
     std::vector<int> t_route(m_vertices->size());
     std::iota(t_route.begin(), t_route.end(), 0);
-    int random_pop_size = Chromosome_size * 2;
+    int random_pop_size = m_population_size * 2;
     for(int i = 0; i < random_pop_size; i++) {
         std::shuffle(t_route.begin(), t_route.end(), std::mt19937{std::random_device{}()});
         temp_heap.push(Chromosome(t_graph, t_route));
     }
-    for (int i = 0; i < Chromosome_size; i++) {
+    for (int i = 0; i < m_population_size; i++) {
         Chromosome candidate = temp_heap.top();
         m_chromosome_heap.push(candidate);
         temp_heap.pop();
     }
+}
+
+void TSP_Algo_G::changePopulationSize(int population_size) {
+    m_population_size = population_size;
 }
 
 int TSP_Algo_G::getCurrentFitness() const{
@@ -155,3 +160,35 @@ bool TSP_Algo_G::Chromosome::operator >(const Chromosome& other_chromosome) cons
     return m_route_fitness > other_chromosome.m_route_fitness;
 }
 
+
+TSP_Algos::TSP_Algo_Genetic_Threaded::TSP_Algo_Genetic_Threaded(Graph *t_graph, int population_size) {
+    m_populations.push_back(new TSP_Algo_Genetic(t_graph, population_size));
+    m_populations.push_back(new TSP_Algo_Genetic(t_graph, population_size));
+    m_populations.push_back(new TSP_Algo_Genetic(t_graph, population_size));
+    m_populations.push_back(new TSP_Algo_Genetic(t_graph, population_size));
+}
+
+void TSP_Algos::TSP_Algo_Genetic_Threaded::run(int num_generations) {
+  std::thread t0(&TSP_Algo_Genetic::run, m_populations[0], num_generations);
+  std::thread t1(&TSP_Algo_Genetic::run, m_populations[1], num_generations);
+  std::thread t2(&TSP_Algo_Genetic::run, m_populations[2], num_generations);
+  std::thread t3(&TSP_Algo_Genetic::run, m_populations[3], num_generations);
+
+  t0.join();
+  t1.join();
+  t2.join();
+  t3.join();
+  for (int i = 0; i <= 4; i++) {
+      if (m_populations[i]->getCurrentFitness() < m_best_fitness) {
+        m_best_fitness = m_populations[i]->getCurrentFitness();
+      }
+  }
+}
+
+const TSP_Algos::TSP_Algo_Genetic *TSP_Algos::TSP_Algo_Genetic_Threaded::getPopulation(int &index) const {
+    return m_populations[index];
+}
+
+int TSP_Algos::TSP_Algo_Genetic_Threaded::getBestFitness() {
+    return m_best_fitness;
+}
