@@ -23,9 +23,24 @@
 **                                                                                 **
 ************************************************************************************/
 
+#include <math.h>
+
+#include <chrono>
+#include <queue>
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <string>
+#include <utility>
+#include <fstream>
+#include <sstream>
+
+
 #include "graph.h"
 
 // Graph Implementations
+Graph::Graph() : size(0) {}
+
 Graph::Graph(std::string file_name) : size(0) {
     readFromFile(file_name);
     m_vertices.shrink_to_fit();
@@ -62,16 +77,7 @@ void Graph::addVertices(const std::vector<Vertex> &t_vertices) {
     }
 }
 
-int Graph::getEdgeWeight(const int& t_from, const int& t_to) const {
-    const Vertex* from_vertex = &m_vertices.at(t_from);
-    return from_vertex->out_edges[t_to].getWeight();
-}
-
-const Vertex *Graph::getVertex(const int &id) {
-    return &m_vertices.at(id);
-}
-
-const std::vector<Vertex> *Graph::getVertices() const {
+std::vector<Vertex>* Graph::getVertices() {
     return &m_vertices;
 }
 
@@ -134,16 +140,6 @@ std::vector<int> Graph::getDijkstraPath(int starting_index) {
         }
     }
     return parent;
-}
-
-int Graph::calcPathLength(const std::vector<int> &t_route) const {
-    int t_total_length = 0;
-    int size = t_route.size() - 1;
-    for (int i = 0; i < size - 1; i++) {
-        t_total_length += getEdgeWeight(t_route[i], t_route[i+1]);
-    }
-    t_total_length += getEdgeWeight(t_route[size], t_route[0]);
-    return t_total_length;
 }
 
 void Graph::readFromFile(std::string file_name) {
