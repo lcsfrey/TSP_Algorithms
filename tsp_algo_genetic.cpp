@@ -39,6 +39,20 @@ TSP_Algo_G::TSP_Algo_Genetic(Graph *t_graph,
 }
 
 void TSP_Algo_G::changePopulationSize(int population_size) {
+    ChromosomeHeap temp_heap;
+    for (int i = 0; i < population_size; i++) {
+        if (i < m_population_size) {
+            Chromosome candidate = m_chromosome_heap.top();
+            temp_heap.push(candidate);
+            m_chromosome_heap.pop();
+        } else {
+            std::vector<int> t_route(m_vertices->size());
+            std::iota(t_route.begin(), t_route.end(), 0);
+            std::shuffle(t_route.begin(), t_route.end(), std::mt19937{std::random_device{}()});
+            temp_heap.push(Chromosome(m_graph, t_route));
+        }
+    }
+    m_chromosome_heap = temp_heap;
     m_population_size = population_size;
 }
 
@@ -192,10 +206,11 @@ void TSP_Algos::TSP_Algo_Genetic_Threaded::migrate() {
     m_populations[to]->m_chromosome_heap.push(migrant_chromosome);
 }
 
-void TSP_Algos::TSP_Algo_Genetic_Threaded::run(int num_generations, bool migratation) {
+void TSP_Algos::TSP_Algo_Genetic_Threaded::run(const int &num_generations) {
     Time::time_point start_time = Time::now();
     std::vector<std::thread> threads(m_thread_count);
 
+    // initialize all threads in thread pool
     for (int i = 0; i < m_thread_count; i++) {
         threads[i] = std::thread(&TSP_Algo_Genetic::run, m_populations[i], num_generations, false);
     }
@@ -203,6 +218,7 @@ void TSP_Algos::TSP_Algo_Genetic_Threaded::run(int num_generations, bool migrata
         current_thread.join();
     }
 
+    // determine the shortest route length
     for (int i = 0; i < m_thread_count; i++) {
         if (m_populations[i]->getCurrentFitness() < m_best_fitness) {
             m_best_fitness = m_populations[i]->getCurrentFitness();
@@ -211,10 +227,17 @@ void TSP_Algos::TSP_Algo_Genetic_Threaded::run(int num_generations, bool migrata
     }
 }
 
+void TSP_Algos::TSP_Algo_Genetic_Threaded::changePopulationSize(int population_size) {
+    for (int i = 0; i < m_thread_count; i++) {
+        m_populations[i]->changePopulationSize(population_size);
+    }
+    m_population_size = population_size;
+}
+
 const TSP_Algos::TSP_Algo_Genetic* TSP_Algos::TSP_Algo_Genetic_Threaded::getPopulation(int &index) const {
     return m_populations[index];
 }
 
-int TSP_Algos::TSP_Algo_Genetic_Threaded::getBestFitness() const {
+int TSP_Algos::TSP_Algo_Genetic_Threaded::getCurrentFitness() const {
     return m_best_fitness;
 }

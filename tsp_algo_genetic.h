@@ -16,25 +16,24 @@ namespace TSP_Algos {
 
 class TSP_Algo_Genetic {
  public:
-
-    // Stores independent TSP route and fitness
+    // stores independent TSP route and fitness
     struct Chromosome {
         // Chromosome variables
         int m_route_fitness;
         std::vector<int> m_route;
 
-        // Constructs chromosome using route
+        // constructs Chromosome using route
         Chromosome(const Graph* graph, const std::vector<int> &route);
 
         // has a probability chance of swapping two random vertices in route
         void mutate(double probability);
 
-        // returns the if this chromosome fitness is greater than
+        // returns true if this chromosome fitness is greater than
         // other_chromosome's fitness
         bool operator> (const Chromosome& other_chromosome) const;
     };
 
-    // Min heap used to store Chromosomes where the top of the heap is the
+    // min heap used to store Chromosomes where the top of the heap is the
     // Chromosome that is storing the best route and smallest route length.
     typedef std::priority_queue<Chromosome,
                                 std::vector<Chromosome>,
@@ -42,21 +41,25 @@ class TSP_Algo_Genetic {
 
     // returns the child Chromosome of two parent chromosomes
     // input parent_1 gives child random subroute
-    //       parent_1 gives child remaining vertices needed to visit
+    //       parent_2 gives child remaining vertices needed to visit
     Chromosome reproduce(const Chromosome& parent_1,
                          const Chromosome& parent_2) const;
 
-    // Constructor that adds chromosome_size random route chromosomes
+    // constructor that adds chromosome_size random route chromosomes
     TSP_Algo_Genetic(Graph *t_graph, int population_size = 1000);
 
+    // changes the number of Chromosomes stored in m_chromosome_heap
     void changePopulationSize(int population_size);
 
-    // Uses current generation contained within m_chromosome_heap to produce
+    // uses current generation contained within m_chromosome_heap to produce
     // a new generation, replacing the old generation with the new one.
     void tick();
 
     // calls the tick method a number of times equal to num_generations
     void run(const int &num_generations = 5000, bool display_status = true);
+
+    // returns the current best route
+    std::vector<int> getRoute() const;
 
     // returns fitness at the top of the heap
     inline int getCurrentFitness() const;
@@ -69,9 +72,6 @@ class TSP_Algo_Genetic {
 
     // sends generation number, time taken, fitness, and mutation rate to stdout
     void printStatus(std::chrono::high_resolution_clock::time_point &start_time);
-
-    // returns the current best route
-    std::vector<int> getRoute() const;
 
     // Allows threaded class access to member variables
     friend class TSP_Algo_Genetic_Threaded;
@@ -105,24 +105,43 @@ class TSP_Algo_Genetic {
 
 class TSP_Algo_Genetic_Threaded {
  public:
-     TSP_Algo_Genetic_Threaded(Graph* t_graph, int population_size = 1000, int thread_count = 4);
+    // constructs number of TSP_Algo_Genetic objects equal to thread_count
+    // and stores pointers to them in m_populations vector
+    TSP_Algo_Genetic_Threaded(Graph* t_graph, int population_size = 1000,
+                              int thread_count = 4);
 
-     // inline void tick(TSP_Algo_Genetic* population) { population->tick(); }
+    // inline void tick(TSP_Algo_Genetic* population) { population->tick(); }
+    // move route solution from one population to another
+    void migrate();
 
-     // move route solutions from one population to another
-     void migrate();
+    // create four threads running their own genetic algorithm
+    void run(const int &num_generations = 5000);
 
-     // create four threads running their own genetic algorithm
-     void run(int num_generations = 5000, bool migratation = true);
+    // changes the number of Chromosomes stored in m_chromosome_heap
+    void changePopulationSize(int population_size);
 
-     const TSP_Algo_Genetic* getPopulation(int &index) const;
+    // returns pointer to genetic object at index in m_populations
+    const TSP_Algo_Genetic* getPopulation(int &index) const;
 
-     int getBestFitness() const;
+    // returns the current best route
+    std::vector<int> getRoute() const;
+
+    // returns fitness at the top of the heap
+    inline int getCurrentFitness() const;
 
  private:
-     int m_best_fitness;
-     int m_thread_count;
-     std::vector<TSP_Algo_Genetic*> m_populations;
+    // stores all populations
+    std::vector<TSP_Algo_Genetic*> m_populations;
+
+    // number of concurrent threads to be run
+    // value corresponds with the size of the m_populations vector
+    int m_thread_count;
+
+    // stores the best fitness of all genetic objects in m_populations
+    int m_best_fitness;
+
+    // size of the chromosome heap
+    int m_population_size;
 };
 
 }  // namespace TSP_Algos
