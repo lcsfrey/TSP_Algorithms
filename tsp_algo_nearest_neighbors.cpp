@@ -22,11 +22,12 @@
 **  SOFTWARE.                                                                      **
 **                                                                                 **
 ************************************************************************************/
-
-#include "tsp_algo_nearest_neighbors.h"
+#include <iostream>
 #include <thread>
 #include <vector>
 #include <tuple>
+
+#include "tsp_algo_nearest_neighbors.h"
 
 class TSP_Algo_Nearest_Neighbors;
 using TSP_Algo_NN = TSP_Algos::TSP_Algo_Nearest_Neighbors;
