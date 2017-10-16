@@ -56,16 +56,25 @@ class TSP_Algo_Genetic {
     void tick();
 
     // calls the tick method a number of times equal to num_generations
-    void run(const int &num_generations = 5000);
+    void run(const int &num_generations = 5000, bool display_status = true);
 
     // returns fitness at the top of the heap
-    int getCurrentFitness() const;
+    inline int getCurrentFitness() const;
 
     // returns mutation probability at this generation
-    double getMutationProbability() const;
+    inline double getMutationProbability() const;
+
+    // returns the current generation
+    inline int getCurrentGenerationCount() const;
+
+    // sends generation number, time taken, fitness, and mutation rate to stdout
+    void printStatus(std::chrono::high_resolution_clock::time_point &start_time);
 
     // returns the current best route
     std::vector<int> getRoute() const;
+
+    // Allows threaded class access to member variables
+    friend class TSP_Algo_Genetic_Threaded;
 
  protected:
     // fitness of the current generation
@@ -80,6 +89,9 @@ class TSP_Algo_Genetic {
     // starting probability that a new generation will mutate (swap vertices)
     double m_mutation_probability;
 
+    // number of generations that have passed
+    int m_generation_count;
+
     // min heap of route chromosomes with the fittest chromosome (the shortest
     // length route) at the top
     ChromosomeHeap m_chromosome_heap;
@@ -93,22 +105,23 @@ class TSP_Algo_Genetic {
 
 class TSP_Algo_Genetic_Threaded {
  public:
-     TSP_Algo_Genetic_Threaded(Graph* t_graph, int population_size = 1000);
+     TSP_Algo_Genetic_Threaded(Graph* t_graph, int population_size = 1000, int thread_count = 4);
 
      // inline void tick(TSP_Algo_Genetic* population) { population->tick(); }
 
      // move route solutions from one population to another
-     void migrate(double m_migration_probability = .1);
+     void migrate();
 
      // create four threads running their own genetic algorithm
-     void run(int num_generations = 5000);
+     void run(int num_generations = 5000, bool migratation = true);
 
      const TSP_Algo_Genetic* getPopulation(int &index) const;
 
-     int getBestFitness();
+     int getBestFitness() const;
 
  private:
-     int m_best_fitness = INT32_MAX;
+     int m_best_fitness;
+     int m_thread_count;
      std::vector<TSP_Algo_Genetic*> m_populations;
 };
 
