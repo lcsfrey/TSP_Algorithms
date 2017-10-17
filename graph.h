@@ -26,28 +26,20 @@
 
 #ifndef GRAPH_H_
 #define GRAPH_H_
-#include <math.h>
+
 #include <vector>
-#include <queue>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <chrono>
-#include <functional>
 #include <string>
 #include <utility>
 
 class Graph;
 class Edge;
 
-class Vertex{
+class Vertex {
  public:
     friend class Graph;
     friend class Edge;
 
-    Vertex(const int &t_x,
-           const int &t_y,
-           const int &t_id);
+    Vertex(const int &t_x, const int &t_y, const int &t_id);
     void addEdge(const Vertex &other_vertex);
 
     inline std::vector<Edge> getEdges() { return out_edges; }
@@ -64,15 +56,13 @@ class Vertex{
 };
 
 
-class Edge{
+class Edge {
  public:
     friend class Graph;
     friend class Vertex;
 
-    Edge(const Vertex &t_from,
-         const Vertex &t_to);
-    Edge(const int &t_to,
-         const int &t_weight);
+    Edge(const Vertex &t_from, const Vertex &t_to);
+    Edge(const int &t_to, const int &t_weight);
 
     inline int getTo() const { return to; }
     inline int getWeight() const { return weight; }
@@ -81,6 +71,7 @@ class Edge{
 
  protected:
     int calculateWeight(const Vertex &t_from, const Vertex &t_to);
+
     const int to;
     const int weight;
 };
@@ -88,26 +79,38 @@ class Edge{
 
 class Graph {
  public:
+    Graph();
     explicit Graph(std::string file_name);
     explicit Graph(const std::vector<std::pair<int, int>> &coords);
 
-    void addVertex(const int &t_vertex_id,
-                   const int &t_vertex_x,
-                   const int &t_vertex_y);
+    void addVertex(const int &t_vertex_id, const int &t_vertex_x, const int &t_vertex_y);
     void addVertex(const Vertex &t_vertex);
     void addVertices(const std::vector<Vertex> &t_vertices);
 
-    const Vertex* getVertex(const int& id);
-    const std::vector<Vertex>* getVertices() const;
+    inline const Vertex* getVertex(const int& id) const { return &m_vertices.at(id); }
+    std::vector<Vertex> *getVertices();
+    inline int getEdgeWeight(const int& t_from, const int& t_to) const {
+        return getVertex(t_from)->getEdge(t_to)->getWeight();
+    }
+    inline int getNumVertices() const { return size; }
+
     std::vector<int> getPrimMST();
     std::vector<int> getDijkstraPath(int starting_index);
-    int getEdgeWeight(const int& t_from, const int& t_to) const;
-    inline int getNumVertices() const {return size;}
-    int calcPathLength(const std::vector<int> &t_route) const;
 
+    // calculates the length of the path connecting all nodes in t_route
+    inline int calcPathLength(const std::vector<int> &t_route) const {
+        int t_total_length = getEdgeWeight(t_route[0], t_route[1]);
+        int size = t_route.size() - 1;
+        for (int i = 1; i < size; i++) {
+            t_total_length += getEdgeWeight(t_route[i], t_route[i+1]);
+        }
+        return t_total_length + getEdgeWeight(t_route[size], t_route[0]);
+    }
 
  private:
+    // loads vertices stored in file
     void readFromFile(std::string file_name);
+
     std::vector<Vertex> m_vertices;
     int size;
 };

@@ -33,10 +33,27 @@
 
 #include "graph.h"
 
+// Traveling Salesperson (TSP) Nearest Neighbors & 2-Opt Algorithms
+//
+// Nearest Neighbors:
+//   Greedy heuristic algorithm that picks a starting vertex, finds the closest
+//   vertex to itself, adds it to the route, moves to that vertex and repeatedly
+//   finds the next closest vertex to move to until all vertices are within the route.
+//
+// 2-Opt:
+//   Optimization algorithm that looks at every pair of edges, (u1, v1) and (u2, v2)
+//   in the tour, checking if, cost(u1, v2) + cost(u2, v1) < cost(u1, v1) + cost(u2, v2).
+//   If it is, then the old edges ((u1, v1) and (u2, v2)) are removed and the
+//   new edges ((u1, v2) and (u2, v1)) are added. The resulting path is a tour between
+//   and including v1 and v2 being traversed in reverse. The algorithm continues to
+//   loop over all pairs of edges, swapping longer edges for smaller ones until it
+//   has made it through all pairs of edges without making an improvement.
+
 namespace TSP_Algos {
 
 class TSP_Algo_Nearest_Neighbors {
  public:
+    // Constructs empty
     explicit TSP_Algo_Nearest_Neighbors(Graph* t_graph);
 
     // calculates the nearest neighbor tour starting at starting_index
@@ -51,7 +68,10 @@ class TSP_Algo_Nearest_Neighbors {
     // work done by method is divided between four threads
     void threadedTwoOpt();
 
+    // returns current route
     inline std::vector<int> getRoute() const { return m_simple_route; }
+
+    // returns length of current route
     inline int getRouteLength() const { return m_route_length; }
 
     // outputs file with the same name as the input file appended with ".tour"
@@ -60,6 +80,7 @@ class TSP_Algo_Nearest_Neighbors {
     void writeToFile(std::string file_name);
 
  private:
+
     // returns the difference between the sum of the weights of two pairs of edges
     // first pair of edges connect i to i+1 and k to k+1 in the route
     // second pair of edges connect i to k and i+1 to k+1 in the route
@@ -67,6 +88,7 @@ class TSP_Algo_Nearest_Neighbors {
                           const int &i,
                           const int &k,
                           const int &size) const;
+
     // findBestChange is used by twoOpt and threadedTwoOpt methods to find the best
     // improvement over an interval. The result is stored as a tuple in
     // change_list[list_position] where the first int is the best improvement,
@@ -80,6 +102,7 @@ class TSP_Algo_Nearest_Neighbors {
                         const int &interval) const;
     int m_route_length;
     const std::vector<Vertex>* m_vertices;
+
     std::vector<int> m_simple_route;
     const Graph* m_graph;
 };
