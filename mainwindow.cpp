@@ -65,6 +65,22 @@ void MainWindow::resetGraph(QCustomPlot *customPlot) {
     customPlot->graph(0)->setScatterStyle(scatter_style);
 }
 
+void MainWindow::displayGenetic() {
+    TSP_Algos::TSP_Algo_Genetic algo_g(m_graph);
+    for (int i = 0; i < 30; i++) {
+       algo_g.run(10);
+       std::this_thread::sleep_for(std::chrono::milliseconds(200));
+       m_tour = algo_g.getRoute();
+       resetGraph(ui->customPlot);
+       drawPoints(ui->customPlot, m_vertices);
+       drawTourLines(ui->customPlot, m_vertices, m_tour);
+
+       ui->customPlot->replot();
+    }
+}
+
+
+
 // prim's minimum spanning tree button
 void MainWindow::on_button_prim_clicked() {
     m_line_choice = 0;
@@ -97,6 +113,14 @@ void MainWindow::on_button_two_opt_clicked() {
     ui->customPlot->replot();
 }
 
+
+void MainWindow::on_Genetic_clicked() {
+    m_line_choice = 4;
+    QString status_label("Selected Genetic Tour");
+    ui->m_label_algorithm->setText(status_label);
+
+}
+
 // draws the selected algorithm on the screen
 void MainWindow::on_button_draw_clicked() {
     if (m_vertices->size() == 0) return;
@@ -117,6 +141,10 @@ void MainWindow::on_button_draw_clicked() {
         }
         case 3: {  // 2-Optimal Tour
             displayTwoOpt();
+            break;
+        }
+        case 4: {  // Genetic Tour
+            displayGenetic();
             break;
         }
     }
@@ -185,7 +213,7 @@ void MainWindow::displayTwoOpt() {
 
 void MainWindow::drawTourLines(QCustomPlot* customPlot,
                                const std::vector<Vertex>* vertices,
-                               std::vector<int> connections) {
+                               const std::vector<int> &connections) {
     int size = connections.size() - 1;
     for (int i = 0; i < size; i++) {
         int parent_x = vertices->at(connections[i]).getX();
@@ -247,7 +275,7 @@ void MainWindow::drawPoints(QCustomPlot *customPlot,
 
 void MainWindow::on_button_load_vertices_clicked() {
     resetGraph(ui->customPlot);
-    QString q_file_name(ui->input_file->text());
+    QString q_file_name("tsp_test_cases/" + ui->input_file->text());
     std::string file_name(q_file_name.toStdString());
     if (m_graph != nullptr) {
         delete m_graph;
@@ -297,7 +325,9 @@ void MainWindow::on_m_button_random_add_vertices_clicked() {
     for (int i = current_size; i < total; i++) {
         m_graph->addVertex(i, rand() % m_max_x, rand() % m_max_y);
     }
+
     m_vertices = m_graph->getVertices();
+    resetGraph(ui->customPlot);
     drawPoints(ui->customPlot, m_vertices);
     ui->customPlot->replot();
 }
