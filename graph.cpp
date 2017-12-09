@@ -35,7 +35,6 @@
 #include <fstream>
 #include <sstream>
 
-
 #include "graph.h"
 
 // Graph Implementations
@@ -169,9 +168,8 @@ void Graph::readFromFile(std::string file_name) {
 }
 
 // Vertex Implementations
-Vertex::Vertex(const int &t_x,
-               const int &t_y,
-               const int &t_id) : x(t_x), y(t_y), id(t_id) {}
+Vertex::Vertex(const int &t_x, const int &t_y, const int &t_id)
+    : x(t_x), y(t_y), id(t_id) {}
 
 void Vertex::addEdge(const Vertex &other_vertex) {
     out_edges.push_back(Edge(*this, other_vertex));

@@ -56,10 +56,6 @@ void TSP_Algo_G::changePopulationSize(int population_size) {
     m_population_size = population_size;
 }
 
-int TSP_Algo_G::getCurrentFitness() const{
-    return m_best_fitness;
-}
-
 double TSP_Algo_G::getMutationProbability() const {
     return m_mutation_probability;
 }
@@ -206,6 +202,11 @@ void TSP_Algos::TSP_Algo_Genetic_Threaded::migrate() {
     m_populations[to]->m_chromosome_heap.push(migrant_chromosome);
 }
 
+void TSP_Algos::TSP_Algo_Genetic_Threaded::tick() {
+    for (int i = 0; i < m_thread_count; i++)
+        m_populations[i]->tick();
+}
+
 void TSP_Algos::TSP_Algo_Genetic_Threaded::run(const int &num_generations) {
     Time::time_point start_time = Time::now();
     std::vector<std::thread> threads(m_thread_count);
@@ -236,8 +237,4 @@ void TSP_Algos::TSP_Algo_Genetic_Threaded::changePopulationSize(int population_s
 
 const TSP_Algos::TSP_Algo_Genetic* TSP_Algos::TSP_Algo_Genetic_Threaded::getPopulation(int &index) const {
     return m_populations[index];
-}
-
-int TSP_Algos::TSP_Algo_Genetic_Threaded::getCurrentFitness() const {
-    return m_best_fitness;
 }

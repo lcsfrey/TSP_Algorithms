@@ -24,7 +24,7 @@ Vertex_TrieNode::Vertex_TrieNode(Graph* t_graph,
             // length of tour in that state = m_length_so_far + change
             Vertex_TrieNode* t_node_pointer;
             t_node_pointer = new Vertex_TrieNode(t_graph,
-                                                 &(t_graph->getVertices().at(i)),
+                                                 &(t_graph->getVertices()->at(i)),
                                                  m_in_route,
                                                  size,
                                                  m_length_so_far);
@@ -46,7 +46,7 @@ Graph_path_trie::Graph_path_trie(Graph *t_graph,
     for (int i = 0; i < size; i++)
         m_in_route.push_back(false);
     m_in_route[0] = true;
-    std::vector<Vertex>* t_vertices_pointer = &t_graph->getVertices();
+    std::vector<Vertex>* t_vertices_pointer = t_graph->getVertices();
     Vertex* t_vertex_pointer = &(t_vertices_pointer->front());
     m_starting_vertex = new Vertex_TrieNode(t_graph, t_vertex_pointer, m_in_route, size, 0);
 }
