@@ -28,19 +28,19 @@ class MainWindow : public QMainWindow {
 
     // draws minimum spanning tree lines
     void drawPrimLines(QCustomPlot* customPlot,
-                       const std::vector<Vertex> *vertices,
-                       std::vector<int> connections);
+                       const std::vector<Vertex>* vertices,
+                       const std::vector<int> &connections);
 
     // draws vertices on graph
     void drawPoints(QCustomPlot* customPlot,
-                    const std::vector<Vertex> *vertices);
+                    const std::vector<Vertex>* vertices);
 
     // deletes all drawn lines and vertices from graph
     // reinitializes drawing properties
     void resetGraph(QCustomPlot* customPlot);
 
 
-    void displayGenetic();
+    void displayGenetic(int num_generations);
     void displayPrim();
     void displayDijkstras();
     void displayNearestNeighbor();

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.8.0
+** Created by: Qt User Interface Compiler version 5.5.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -36,8 +36,6 @@ public:
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout;
     QHBoxLayout *horizontalLayout;
-    QLabel *m_label_algorithm;
-    QSpacerItem *horizontalSpacer_3;
     QHBoxLayout *horizontalLayout_3;
     QLabel *file_status;
     QVBoxLayout *verticalLayout_6;
@@ -48,6 +46,7 @@ public:
     QSpinBox *m_spinbox_random_vertices_to_add;
     QLabel *label_3;
     QPushButton *m_button_random_add_vertices;
+    QLabel *m_label_algorithm;
     QHBoxLayout *horizontalLayout_4;
     QVBoxLayout *verticalLayout_4;
     QHBoxLayout *horizontalLayout_2;
@@ -63,6 +62,7 @@ public:
     QVBoxLayout *verticalLayout_7;
     QPushButton *button_nearest;
     QPushButton *button_two_opt;
+    QPushButton *Genetic;
     QVBoxLayout *verticalLayout_5;
     QPushButton *button_dijkstras;
     QPushButton *button_prim;
@@ -78,7 +78,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->resize(900, 677);
+        MainWindow->resize(900, 731);
         actionDraw = new QAction(MainWindow);
         actionDraw->setObjectName(QStringLiteral("actionDraw"));
         centralWidget = new QWidget(MainWindow);
@@ -90,17 +90,6 @@ public:
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setSpacing(3);
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        m_label_algorithm = new QLabel(centralWidget);
-        m_label_algorithm->setObjectName(QStringLiteral("m_label_algorithm"));
-        m_label_algorithm->setMinimumSize(QSize(200, 0));
-        m_label_algorithm->setMaximumSize(QSize(280, 16777215));
-
-        horizontalLayout->addWidget(m_label_algorithm);
-
-        horizontalSpacer_3 = new QSpacerItem(20, 20, QSizePolicy::Maximum, QSizePolicy::Minimum);
-
-        horizontalLayout->addItem(horizontalSpacer_3);
-
         horizontalLayout_3 = new QHBoxLayout();
         horizontalLayout_3->setSpacing(6);
         horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
@@ -161,6 +150,13 @@ public:
 
 
         verticalLayout->addLayout(horizontalLayout);
+
+        m_label_algorithm = new QLabel(centralWidget);
+        m_label_algorithm->setObjectName(QStringLiteral("m_label_algorithm"));
+        m_label_algorithm->setMinimumSize(QSize(200, 0));
+        m_label_algorithm->setMaximumSize(QSize(280, 16777215));
+
+        verticalLayout->addWidget(m_label_algorithm);
 
         horizontalLayout_4 = new QHBoxLayout();
         horizontalLayout_4->setSpacing(3);
@@ -252,6 +248,11 @@ public:
 
         verticalLayout_7->addWidget(button_two_opt);
 
+        Genetic = new QPushButton(centralWidget);
+        Genetic->setObjectName(QStringLiteral("Genetic"));
+
+        verticalLayout_7->addWidget(Genetic);
+
 
         horizontalLayout_4->addLayout(verticalLayout_7);
 
@@ -324,25 +325,26 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "QCustomPlot plot examples", Q_NULLPTR));
-        actionDraw->setText(QApplication::translate("MainWindow", "Draw", Q_NULLPTR));
-        m_label_algorithm->setText(QApplication::translate("MainWindow", "No algorithm selected", Q_NULLPTR));
-        file_status->setText(QApplication::translate("MainWindow", "TextLabel", Q_NULLPTR));
-        input_file->setText(QApplication::translate("MainWindow", "test-input-1.txt", Q_NULLPTR));
-        button_load_vertices->setText(QApplication::translate("MainWindow", "Load Vertices", Q_NULLPTR));
-        label_3->setText(QApplication::translate("MainWindow", "Total", Q_NULLPTR));
-        m_button_random_add_vertices->setText(QApplication::translate("MainWindow", "Add Random Vertices", Q_NULLPTR));
-        label_2->setText(QApplication::translate("MainWindow", "Tour length: ", Q_NULLPTR));
-        m_label_tour_length->setText(QApplication::translate("MainWindow", "0", Q_NULLPTR));
-        m_time_taken->setText(QApplication::translate("MainWindow", "Time taken:", Q_NULLPTR));
-        m_value_time_taken->setText(QApplication::translate("MainWindow", "0", Q_NULLPTR));
-        label->setText(QApplication::translate("MainWindow", "Starting Index", Q_NULLPTR));
-        button_nearest->setText(QApplication::translate("MainWindow", "Nearest Neighbors", Q_NULLPTR));
-        button_two_opt->setText(QApplication::translate("MainWindow", "2-Opt", Q_NULLPTR));
-        button_dijkstras->setText(QApplication::translate("MainWindow", "Dijkstras", Q_NULLPTR));
-        button_prim->setText(QApplication::translate("MainWindow", "Prim MST", Q_NULLPTR));
-        button_draw->setText(QApplication::translate("MainWindow", "Draw Lines", Q_NULLPTR));
-        button_clear->setText(QApplication::translate("MainWindow", "Clear Lines", Q_NULLPTR));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "QCustomPlot plot examples", 0));
+        actionDraw->setText(QApplication::translate("MainWindow", "Draw", 0));
+        file_status->setText(QApplication::translate("MainWindow", "TextLabel", 0));
+        input_file->setText(QApplication::translate("MainWindow", "test-input-1.txt", 0));
+        button_load_vertices->setText(QApplication::translate("MainWindow", "Load Vertices", 0));
+        label_3->setText(QApplication::translate("MainWindow", "Total", 0));
+        m_button_random_add_vertices->setText(QApplication::translate("MainWindow", "Add Random Vertices", 0));
+        m_label_algorithm->setText(QApplication::translate("MainWindow", "No algorithm selected", 0));
+        label_2->setText(QApplication::translate("MainWindow", "Tour length: ", 0));
+        m_label_tour_length->setText(QApplication::translate("MainWindow", "0", 0));
+        m_time_taken->setText(QApplication::translate("MainWindow", "Time taken:", 0));
+        m_value_time_taken->setText(QApplication::translate("MainWindow", "0", 0));
+        label->setText(QApplication::translate("MainWindow", "Starting Index", 0));
+        button_nearest->setText(QApplication::translate("MainWindow", "Nearest Neighbors", 0));
+        button_two_opt->setText(QApplication::translate("MainWindow", "2-Opt", 0));
+        Genetic->setText(QApplication::translate("MainWindow", "Genetic", 0));
+        button_dijkstras->setText(QApplication::translate("MainWindow", "Dijkstras", 0));
+        button_prim->setText(QApplication::translate("MainWindow", "Prim MST", 0));
+        button_draw->setText(QApplication::translate("MainWindow", "Draw Lines", 0));
+        button_clear->setText(QApplication::translate("MainWindow", "Clear Lines", 0));
     } // retranslateUi
 
 };
