@@ -62,7 +62,7 @@ class TSP_Algo_Genetic {
     std::vector<int> getRoute() const;
 
     // returns fitness at the top of the heap
-    inline int getCurrentFitness() const;
+    inline int getCurrentFitness() const { return m_best_fitness; }
 
     // returns mutation probability at this generation
     inline double getMutationProbability() const;
@@ -114,6 +114,8 @@ class TSP_Algo_Genetic_Threaded {
     // move route solution from one population to another
     void migrate();
 
+    void tick();
+
     // create four threads running their own genetic algorithm
     void run(const int &num_generations = 5000);
 
@@ -127,7 +129,9 @@ class TSP_Algo_Genetic_Threaded {
     std::vector<int> getRoute() const;
 
     // returns fitness at the top of the heap
-    inline int getCurrentFitness() const;
+    inline int getCurrentFitness() const { return m_best_fitness; }
+
+    inline int getThreadCount() const { return m_thread_count; }
 
  private:
     // stores all populations

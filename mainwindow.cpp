@@ -27,6 +27,7 @@
 #include <string>
 #include <vector>
 #include <ctime>
+#include <iostream>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -46,15 +47,13 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::resetGraph(QCustomPlot *customPlot) {
-    if (customPlot->graphCount() > 0) {
+    if (customPlot->graphCount() > 0)
         customPlot->clearGraphs();
-    }
-    if (customPlot->itemCount() > 0) {
+    if (customPlot->itemCount() > 0)
         customPlot->clearItems();
-    }
-    if (customPlot->plottableCount() > 0) {
+    if (customPlot->plottableCount() > 0)
         customPlot->clearPlottables();
-    }
+
     customPlot->addGraph();
     customPlot->graph(0)->setLineStyle(QCPGraph::lsNone);
     QCPScatterStyle scatter_style;
@@ -97,6 +96,13 @@ void MainWindow::on_button_two_opt_clicked() {
     ui->customPlot->replot();
 }
 
+
+void MainWindow::on_Genetic_clicked() {
+    m_line_choice = 4;
+    QString status_label("Selected Genetic Tour");
+    ui->m_label_algorithm->setText(status_label);
+}
+
 // draws the selected algorithm on the screen
 void MainWindow::on_button_draw_clicked() {
     if (m_vertices->size() == 0) return;
@@ -119,37 +125,36 @@ void MainWindow::on_button_draw_clicked() {
             displayTwoOpt();
             break;
         }
+        case 4: {  // Genetic Tour
+            displayGenetic(100);
+            break;
+        }
     }
     ui->customPlot->replot();
 }
 
 void MainWindow::displayPrim() {
-    QString status_label("Calculating Prim's Minimum Spanning Tree...");
-    ui->m_label_algorithm->setText(status_label);
+    ui->m_label_algorithm->setText("Calculating Prim's Minimum Spanning Tree...");
     ui->customPlot->replot();
 
     std::vector<int> mst = m_graph->getPrimMST();
     drawPrimLines(ui->customPlot, m_vertices, mst);
 
-    status_label = "Showing Prim's Minimum Spanning Tree";
-    ui->m_label_algorithm->setText(status_label);
+    ui->m_label_algorithm->setText("Showing Prim's Minimum Spanning Tree");
 }
 
 void MainWindow::displayDijkstras() {
-    QString status_label("Calculating Dijktra's Shortest Path...");
-    ui->m_label_algorithm->setText(status_label);
+    ui->m_label_algorithm->setText("Calculating Dijktra's Shortest Path...");
     ui->customPlot->replot();
 
     std::vector<int> dijkstra_path = m_graph->getDijkstraPath(m_starting_index);
     drawPrimLines(ui->customPlot, m_vertices, dijkstra_path);
 
-    status_label = "Showing Dijkstra's Shortest Path";
-    ui->m_label_algorithm->setText(status_label);
+    ui->m_label_algorithm->setText("Showing Dijkstra's Shortest Path");
 }
 
 void MainWindow::displayNearestNeighbor() {
-    QString status_label("Calculating Nearest Neighbors Tour...");
-    ui->m_label_algorithm->setText(status_label);
+    ui->m_label_algorithm->setText("Calculating Nearest Neighbors Tour...");
     ui->customPlot->replot();
 
     TSP_Algos::TSP_Algo_Nearest_Neighbors algo_nn(m_graph);
@@ -157,16 +162,12 @@ void MainWindow::displayNearestNeighbor() {
     m_tour = algo_nn.getRoute();
     drawTourLines(ui->customPlot, m_vertices, m_tour);
 
-    std::string str_tour_length(std::to_string(algo_nn.getRouteLength()));
-    QString q_str_tour_length(str_tour_length.c_str());
-    ui->m_label_tour_length->setText(q_str_tour_length);
-    status_label = "Showing Nearest Neighbors Tour";
-    ui->m_label_algorithm->setText(status_label);
+    ui->m_label_tour_length->setText(QString::number(algo_nn.getRouteLength()));
+    ui->m_label_algorithm->setText("Showing Nearest Neighbors Tour");
 }
 
 void MainWindow::displayTwoOpt() {
-    QString status_label("Calculating 2-Optimal Tour...");
-    ui->m_label_algorithm->setText(status_label);
+    ui->m_label_algorithm->setText("Calculating 2-Optimal Tour...");
     ui->customPlot->replot();
 
     TSP_Algos::TSP_Algo_Nearest_Neighbors algo_nn(m_graph);
@@ -175,17 +176,29 @@ void MainWindow::displayTwoOpt() {
     m_tour = algo_nn.getRoute();
     drawTourLines(ui->customPlot, m_vertices, m_tour);
 
-    ui->m_label_tour_length->setText(QString(algo_nn.getRouteLength()));
-    std::string str_tour(std::to_string(algo_nn.getRouteLength()));
-    QString t_q_string(str_tour.c_str());
-    ui->m_label_tour_length->setText(t_q_string);
-    status_label = "Showing 2-Optimal Tour";
-    ui->m_label_algorithm->setText(status_label);
+    ui->m_label_tour_length->setText(QString::number(algo_nn.getRouteLength()));
+    ui->m_label_algorithm->setText("Showing 2-Optimal Tour");
+}
+
+void MainWindow::displayGenetic(int num_generations) {
+    ui->m_label_algorithm->setText("Calculating Genetic Tour...");
+    TSP_Algos::TSP_Algo_Genetic algo_g(m_graph);
+    for (int i = 0; i < num_generations; i++) {
+       algo_g.run(10);
+       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+       m_tour = algo_g.getRoute();
+       resetGraph(ui->customPlot);
+       drawPoints(ui->customPlot, m_vertices);
+       drawTourLines(ui->customPlot, m_vertices, m_tour);
+       ui->customPlot->replot();
+    }
+    ui->m_label_tour_length->setText(QString::number(algo_g.getCurrentFitness()));
+    ui->m_label_algorithm->setText("Showing Genetic Tour");
 }
 
 void MainWindow::drawTourLines(QCustomPlot* customPlot,
                                const std::vector<Vertex>* vertices,
-                               std::vector<int> connections) {
+                               const std::vector<int> &connections) {
     int size = connections.size() - 1;
     for (int i = 0; i < size; i++) {
         int parent_x = vertices->at(connections[i]).getX();
@@ -195,8 +208,8 @@ void MainWindow::drawTourLines(QCustomPlot* customPlot,
         int child_y = vertices->at(connections[i+1]).getY();
         QCPItemLine *line = new QCPItemLine(customPlot);
         line->setPen(QPen(Qt::blue));
-        line->start->setCoords(parent_x, parent_y + 20);
-        line->end->setCoords(child_x, child_y + 20);
+        line->start->setCoords(parent_x, parent_y);
+        line->end->setCoords(child_x, child_y);
     }
     int parent_x = vertices->at(connections[size]).getX();
     int parent_y = vertices->at(connections[size]).getY();
@@ -205,13 +218,13 @@ void MainWindow::drawTourLines(QCustomPlot* customPlot,
     int child_y = vertices->at(connections[0]).getY();
     QCPItemLine *line = new QCPItemLine(customPlot);
     line->setPen(QPen(Qt::blue));
-    line->start->setCoords(parent_x, parent_y + 20);
-    line->end->setCoords(child_x, child_y + 20);
+    line->start->setCoords(parent_x, parent_y);
+    line->end->setCoords(child_x, child_y);
 }
 
 void MainWindow::drawPrimLines(QCustomPlot *customPlot,
                    const std::vector<Vertex>* vertices,
-                   std::vector<int> connections) {
+                   const std::vector<int> &connections) {
     for (auto vertex : *vertices) {
         int parent_x = vertices->at(connections[vertex.getID()]).getX();
         int parent_y = vertices->at(connections[vertex.getID()]).getY();
@@ -226,32 +239,30 @@ void MainWindow::drawPrimLines(QCustomPlot *customPlot,
 }
 
 void MainWindow::drawPoints(QCustomPlot *customPlot,
-                            const std::vector<Vertex> *vertices) {
+                            const std::vector<Vertex>* vertices) {
     if (vertices == nullptr) return;
 
-    for (auto vertex : *vertices) {
+    for (Vertex vertex : *vertices) {
         int x = vertex.getX();
-        int y = vertex.getY() + 20;
+        int y = vertex.getY();
         customPlot->graph(0)->addData(x, y);
         QCPItemText *text = new QCPItemText(customPlot);
-        // text->setTextColor(Qt::green);
         text->setColor(Qt::red);
         QFont font;
         font.setPointSize(8);
         text->setFont(font);
-        QString str = QString::number(vertex.getID());
-        text->setText(QString(str));
+        text->setText(QString::number(vertex.getID()));
         text->position->setCoords(x,  y);
     }
 }
 
 void MainWindow::on_button_load_vertices_clicked() {
     resetGraph(ui->customPlot);
-    QString q_file_name(ui->input_file->text());
-    std::string file_name(q_file_name.toStdString());
-    if (m_graph != nullptr) {
+    std::string file_name("tsp_test_cases/" + ui->input_file->text().toStdString());
+
+    if (m_graph != nullptr)
         delete m_graph;
-    }
+
     m_graph = new Graph(file_name);
     m_vertices = m_graph->getVertices();
 
@@ -266,14 +277,12 @@ void MainWindow::on_button_load_vertices_clicked() {
             m_max_y = y;
     }
 
-    ui->customPlot->xAxis->setRange(0, m_max_x+50);
-    ui->customPlot->yAxis->setRange(0, m_max_y+50);
+    ui->customPlot->xAxis->setRange(-20, m_max_x+50);
+    ui->customPlot->yAxis->setRange(-20, m_max_y+50);
     drawPoints(ui->customPlot, m_vertices);
 
-    QString t_q_string("");
-    ui->m_label_tour_length->setText(t_q_string);
-    QString t_q_file(file_name.c_str());
-    ui->file_status->setText(QString("Current file: ") + t_q_file);
+    ui->m_label_tour_length->setText("");
+    ui->file_status->setText("Current file: " + QString(file_name.c_str()));
 
     ui->customPlot->replot();
 }
@@ -282,8 +291,7 @@ void MainWindow::on_button_load_vertices_clicked() {
 void MainWindow::on_button_clear_clicked() {
     resetGraph(ui->customPlot);
     drawPoints(ui->customPlot, m_vertices);
-    QString t_q_string("");
-    ui->m_label_tour_length->setText(t_q_string);
+    ui->m_label_tour_length->setText("");
     ui->customPlot->replot();
 }
 
@@ -294,10 +302,11 @@ void MainWindow::on_spinBox_editingFinished() {
 void MainWindow::on_m_button_random_add_vertices_clicked() {
     int current_size = m_graph->getNumVertices();
     int total = current_size + ui->m_spinbox_random_vertices_to_add->value();
-    for (int i = current_size; i < total; i++) {
+    for (int i = current_size; i < total; i++)
         m_graph->addVertex(i, rand() % m_max_x, rand() % m_max_y);
-    }
+
     m_vertices = m_graph->getVertices();
+    resetGraph(ui->customPlot);
     drawPoints(ui->customPlot, m_vertices);
     ui->customPlot->replot();
 }
