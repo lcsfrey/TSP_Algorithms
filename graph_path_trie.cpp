@@ -1,7 +1,7 @@
 #include "graph_path_trie.h"
 
 Vertex_TrieNode::Vertex_TrieNode(Graph* t_graph,
-                                 Vertex* t_vert_pointer,
+                                 VertexEuclid* t_vert_pointer,
                                  std::vector<bool> t_in_route,
                                  const int& size,
                                  int t_length) {
@@ -41,12 +41,11 @@ Vertex_TrieNode::Vertex_TrieNode(Graph* t_graph,
     }
 }
 
-Graph_path_trie::Graph_path_trie(Graph *t_graph,
-                                 const int t_size) : m_graph(t_graph), size(t_size) {
-    for (int i = 0; i < size; i++)
-        m_in_route.push_back(false);
+Graph_path_trie::Graph_path_trie(Graph *t_graph, const int t_size)
+    : m_graph(t_graph), size(t_size) {
+  for (int i = 0; i < size; i++) m_in_route.push_back(false);
     m_in_route[0] = true;
-    std::vector<Vertex>* t_vertices_pointer = t_graph->getVertices();
-    Vertex* t_vertex_pointer = &(t_vertices_pointer->front());
+    std::vector<VertexEuclid>* t_vertices_pointer = t_graph->getVertices();
+    VertexEuclid* t_vertex_pointer = &(t_vertices_pointer->front());
     m_starting_vertex = new Vertex_TrieNode(t_graph, t_vertex_pointer, m_in_route, size, 0);
 }
