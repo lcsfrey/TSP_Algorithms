@@ -23,17 +23,17 @@ class MainWindow : public QMainWindow {
  protected:
     // draws traveling salesman approximation lines
     void drawTourLines(QCustomPlot* customPlot,
-                       const std::vector<Vertex>* vertices,
+                       const std::vector<VertexEuclid>* vertices,
                        const std::vector<int> &connections);
 
     // draws minimum spanning tree lines
     void drawPrimLines(QCustomPlot* customPlot,
-                       const std::vector<Vertex>* vertices,
+                       const std::vector<VertexEuclid>* vertices,
                        const std::vector<int> &connections);
 
     // draws vertices on graph
     void drawPoints(QCustomPlot* customPlot,
-                    const std::vector<Vertex>* vertices);
+                    const std::vector<VertexEuclid>* vertices);
 
     // deletes all drawn lines and vertices from graph
     // reinitializes drawing properties
@@ -69,7 +69,7 @@ private slots:
 
   private:
     Graph* m_graph = nullptr;
-    const std::vector<Vertex>* m_vertices = nullptr;
+    const std::vector<VertexEuclid>* m_vertices = nullptr;
     std::vector<int> m_tour;
     int m_line_choice = 0;
     int m_starting_index = 0;
