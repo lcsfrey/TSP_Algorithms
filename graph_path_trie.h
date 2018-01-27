@@ -37,40 +37,37 @@
 #include <vector>
 
 class Vertex_TrieNode {
-    //  t_graph : the graph we are using
-    //  t_vert_pointer : pointer to vertex of the current node we are at
-    //  inPath : array of booleans indicating which elements are already in array
-    //  size : number of total vertices
-    //  t_length : length of tour if it ended here
-    public:
-        Vertex_TrieNode(Graph* t_graph,
-                        Vertex* t_vert_pointer,
-                        std::vector<bool> t_in_route,
-                        const int& size,
-                        int t_length);
+  //  t_graph : the graph we are using
+  //  t_vert_pointer : pointer to vertex of the current node we are at
+  //  t_in_route : array of booleans indicating which elements are already in final route
+  //  size : number of total vertices
+  //  t_length : length of tour if it ended here
+ public:
+  Vertex_TrieNode(Graph* t_graph, VertexEuclid *t_vert_pointer,
+                  std::vector<bool> t_in_route, const int& size, int t_length);
 
-    // member variables:
-    //   *m_ver_pointer : pointer to vertex that was visited by creating this node
-    //   *m_length_so_far : current length;
-    //   *m_in_route : boolean array of which vertices are in the tour already
-    //   *m_potential_next_paths : vector of pointers to nodes we could look at visiting next
-    //   *m_vertices : pointer to the vector of vertices
-    private:
-    const Vertex* m_vert_pointer;
-    int m_length_so_far;
-    std::vector<bool> m_in_route;
-    std::vector<Vertex_TrieNode*> m_potential_next_paths;
+  // member variables:
+  //   m_ver_pointer : pointer to vertex that was visited by creating this node
+  //   m_length_so_far : current length of route
+  //   m_in_route : boolean array of which vertices are in the tour already
+  //   m_potential_next_paths : vector of pointers to nodes we could look at visiting next
+  //   m_vertices : pointer to the vector of vertices
+  private:
+  const Vertex* m_vert_pointer;
+  int m_length_so_far;
+  std::vector<bool> m_in_route;
+  std::vector<Vertex_TrieNode*> m_potential_next_paths;
 };
 
 class Graph_path_trie {
  public:
-        Graph_path_trie(Graph *t_graph, const int t_size);
+  Graph_path_trie(Graph *t_graph, const int t_size);
 
  private:
-        const Graph* m_graph;
-        std::vector<bool> m_in_route;
-        Vertex_TrieNode* m_starting_vertex;
-        const int size;
+  const Graph* m_graph;
+  std::vector<bool> m_in_route;
+  Vertex_TrieNode* m_starting_vertex;
+  const int size;
 };
 
 #endif  // GRAPH_PATH_TRIE_H_
