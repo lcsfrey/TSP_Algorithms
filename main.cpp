@@ -24,8 +24,11 @@
 **                                                                                 **
 ************************************************************************************/
 
+#include <unistd.h>
+
 #include <QApplication>
 #include <iostream>
+#include <ratio>
 
 #include "graph.h"
 #include "tsp_algo_nearest_neighbors.h"
@@ -33,27 +36,23 @@
 #include "graph_path_trie.h"
 #include "mainwindow.h"
 
-using namespace std;
-
-int testMenu(int argc, char *argv[]);
-void testGenetic(Graph *t_graph, bool is_threaded = false);
-int showWindow();
 void printLicense();
 int displayGUI(int argc, char *argv[]);
-
+int menuMain(int argc, char *argv[]);
+void menuGenetic(Graph *t_graph, bool is_threaded = false);
 
 int main(int argc, char *argv[]) {
   printLicense();
-  testMenu(argc, argv);
+  menuMain(argc, argv);
   return 0;
 }
 
-int testMenu(int argc, char *argv[]) {
-  Graph* my_graph = new Graph("tsp_test_cases/test-input-6.txt");
+int menuMain(int argc, char *argv[]) {
+  Graph* my_graph = new Graph("tsp_test_cases/test-input-3.txt");
   TSP_Algos::TSP_Algo_Nearest_Neighbors algo_nn(my_graph);
   int choice = -1;
   while (choice != 0) {
-    cout << "--------------------------------------------------------------------------------\n"
+    std::cout << "--------------------------------------------------------------------------------\n"
        << "Select method:\n"
        << "0 - Exit\n"
        << "1 - Nearest Neighbor\n"
@@ -63,8 +62,8 @@ int testMenu(int argc, char *argv[]) {
        << "5 - Threaded Genetic\n"
        << "6 - Launch GUI\n"
        << "\n";
-    cin >> choice;
-    cout << endl;
+    std::cin >> choice;
+    std::cout << endl;
     switch (choice) {
       case 0: break;
       case 1: algo_nn.findPath(); break;
@@ -76,16 +75,16 @@ int testMenu(int argc, char *argv[]) {
         algo_nn.findPath();
         algo_nn.threadedTwoOpt();
         break;
-      case 4: testGenetic(my_graph); break;
-      case 5: testGenetic(my_graph, true); break;
+      case 4: menuGenetic(my_graph); break;
+      case 5: menuGenetic(my_graph, true); break;
       case 6: return displayGUI(argc, argv); break;
-      default: cout << "Invalid choice!\n"; break;
+      default: std::cout << "Invalid choice!\n"; break;
     }
   }
   return 0;
 }
 
-void testGenetic(Graph* t_graph, bool is_threaded) {
+void menuGenetic(Graph* t_graph, bool is_threaded) {
   int choice = -1;
   int num_gens = 100;
   int current_gen = 0;
@@ -101,16 +100,16 @@ void testGenetic(Graph* t_graph, bool is_threaded) {
 
   do {
     if (is_threaded) {
-      cout << "\n--------------------------------------------------------------------------------\n"
+      std::cout << "\n--------------------------------------------------------------------------------\n"
          << "Threaded Genetic Algorithm\n"
          << "Number of threads: " << algo_tg->getThreadCount() << "\n"
          << "Best fitness so far: " << algo_tg->getCurrentFitness() << "\n";
     } else {
-      cout << "\n--------------------------------------------------------------------------------\n"
+      std::cout << "\n--------------------------------------------------------------------------------\n"
          << "Genetic Algorithm\n"
          << "Best fitness so far: " << algo_g->getCurrentFitness() << "\n";
     }
-    cout << "Current generation: " << current_gen << "\n"
+    std::cout << "Current generation: " << current_gen << "\n"
        << "Population size: " << pop_size << "\n\n"
        << "Select options:\n"
        << "0 - Exit\n"
@@ -118,7 +117,7 @@ void testGenetic(Graph* t_graph, bool is_threaded) {
        << "2 - Next generation\n"
        << "3 - Change population size\n"
        << "4 - Change number of generations\n";
-    cin >> choice;
+    std::cin >> choice;
     switch(choice) {
       case 0: break;
       case 1:
@@ -138,8 +137,8 @@ void testGenetic(Graph* t_graph, bool is_threaded) {
         current_gen++;
         break;
       case 3:
-        cout << "Enter size:\n";
-        cin >> pop_size;
+        std::cout << "Enter size:\n";
+        std::cin >> pop_size;
         if (is_threaded) {
           algo_tg->changePopulationSize(pop_size);
         } else {
@@ -147,11 +146,11 @@ void testGenetic(Graph* t_graph, bool is_threaded) {
         }
         break;
       case 4:
-        cout << "Enter number of gens:\n";
-        cin >> num_gens;
+        std::cout << "Enter number of generations:\n";
+        std::cin >> num_gens;
         break;
       default:
-        cout << "Invalid choice!\n";
+        std::cout << "Invalid choice!\n";
       }
   } while (choice != 0);
 
@@ -202,8 +201,8 @@ void printLicense() {
   "*                                                                              *\n"
   "*                                 GraphPlot                                    *\n"
   "*  Author: Lucas Frey                                                          *\n"
-  "*  Version: 2.0                                                                *\n"
-  "*  Date Last Modified: 10/16/2017                                              *\n"
+  "*  Version: 2.1                                                              *\n"
+  "*  Date Last Modified: 2/8/2018                                              *\n"
   "*                                                                              *\n"
   " ******************************************************************************\n\n";
 }
