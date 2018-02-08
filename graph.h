@@ -32,59 +32,13 @@
 #include <utility>
 #include <unordered_map>
 
-// used to store edge information
-//  first int - stores the ID of the connected vertex
-// second int - stores the weight of the edge
-using Edge = std::pair<int,int>;
-
-class Vertex {
- public:
-  explicit Vertex(const int &t_id);
-  void addEdge(const Vertex &other_vertex, const int weight = 1);
-
-  // returns the edged weight
-  int getEdgeWeight(int to) const;
-
-  bool hasEdge(int to) const { return out_edges.find(to) != out_edges.end(); }
-  int getID() const { return id; }
-  const std::unordered_map<int, int>* getEdges() const { return &out_edges; }
-
- protected:
-  std::unordered_map<int, int> out_edges;
-  const int id;
-};
-
-class VertexEuclid : public Vertex {
- public:
-  explicit VertexEuclid(const int& t_id) : Vertex(t_id), x(0), y(0) {}
-  VertexEuclid(const int & t_id, const int &t_x, const int &t_y)
-     : Vertex(t_id), x(t_x), y(t_y) { }
-
-  void addEdge(const VertexEuclid &other_vertex);
-
-  int getX() const { return x; }
-  int getY() const { return y; }
-
-protected:
-  int calculateWeight(const VertexEuclid &t_to) const;
-  const int x;
-  const int y;
-};
-
-inline int Vertex::getEdgeWeight(int to) const {
-  const auto weight = out_edges.find(to);
-  if (weight != out_edges.end())
-    return weight->second;
-  else
-    return INT32_MAX;
-}
-
+#include "vertex.h"
 
 class Graph {
  public:
   Graph();
-  explicit Graph(std::string file_name);
-  explicit Graph(const std::vector<Edge> &coords);
+  explicit Graph(std::string file_name, bool is_complete = true);
+  explicit Graph(const std::vector<std::pair<int,int>> &coords, bool is_complete = true);
 
   ~Graph() {}
 
@@ -92,10 +46,20 @@ class Graph {
   void addVertex(const int &t_id, const int &t_x, const int &t_y);
   void addVertices(const std::vector<VertexEuclid> &t_vertices);
 
-  void generateRandomDirectedGraphFile(std::string &file_name, int num_vertices,
-                                       int upper_x_bound, int upper_y_bound);
+  void connectVertices(const std::vector<std::vector<bool> > &adj_matrix);
 
-  void generateRandomCompleteGraphFile(std::string &file_name,int num_vertices,
+  bool hasEdge(const int& from, const int& to) const {
+    if (m_is_complete)
+      return true;
+    else
+      return getVertex(from)->hasEdge(to);
+  }
+
+  void generateRandomDirectedGraphFile(std::string &file_name, int num_vertices,
+                                       int upper_x_bound, int upper_y_bound,
+                                       float edge_load_factor = .5);
+
+  void generateRandomCompleteGraphFile(std::string &file_name, int num_vertices,
                                        int upper_x_bound, int upper_y_bound);
 
   // returns const pointer to vertex if id is a valid size or nullptr if not
@@ -123,14 +87,11 @@ class Graph {
   // loads vertices stored in file
   void readFromFile(std::string file_name);
 
-  void connectVertices(const std::vector<std::vector<bool> > &adj_matrix);
-
-  bool hasEdge(const int& from, const int& to) const {
-    return getVertex(from)->hasEdge(to);
-  }
+  void makeGraphComplete();
 
   std::vector<VertexEuclid> m_vertices;
   int size;
+  bool m_is_complete;
 };
 
 inline int Graph::calcPathLength(const std::vector<int> &t_route) const {
