@@ -24,8 +24,6 @@
 **                                                                                 **
 ************************************************************************************/
 
-#include <math.h>
-
 #include <chrono>
 #include <queue>
 #include <iostream>
@@ -39,15 +37,22 @@
 
 #include "graph.h"
 
+// used to store edge information
+//  first int - stores the ID of the connected vertex
+// second int - stores the weight of the edge
+using Edge = std::pair<int, int>;
+
 // Graph Implementations
 Graph::Graph() : size(0) {}
 
-Graph::Graph(std::string file_name) : size(0) {
+Graph::Graph(std::string file_name, bool is_complete)
+    : size(0), m_is_complete(is_complete) {
   readFromFile(file_name);
   m_vertices.shrink_to_fit();
 }
 
-Graph::Graph(const std::vector<Edge> &coords) : size(coords.size()) {
+Graph::Graph(const std::vector<Edge> &coords, bool is_complete)
+    : size(coords.size()), m_is_complete(is_complete) {
   for (int i = 0; i < size;i++)
     addVertex(i, coords[i].first, coords[i].second);
 }
@@ -62,7 +67,8 @@ void Graph::addVertex(const int &t_id, const int &t_x, const int &t_y) {
 }
 
 void Graph::generateRandomDirectedGraphFile(std::string &file_name, int num_vertices,
-                                            int upper_x_bound, int upper_y_bound) {
+                                            int upper_x_bound, int upper_y_bound,
+                                            float edge_load_factor) {
   srand(time(0));
   std::ofstream out_file(file_name);
   for (int from = 0; from < num_vertices; from++) {
@@ -73,10 +79,11 @@ void Graph::generateRandomDirectedGraphFile(std::string &file_name, int num_vert
 
   out_file << "\n";
 
+  float load_factor = edge_load_factor;
   for (int from = 0; from < num_vertices; from++) {
     for (int to = 0; to < num_vertices; to++) {
       if (from != to)
-        out_file << rand() % 2 << " ";
+        out_file << (((rand() % 100) < load_factor) ? "1" : "0") << " ";
       else
         out_file << "0 ";
     }
@@ -90,7 +97,8 @@ void Graph::generateRandomCompleteGraphFile(std::string &file_name, int n,
   srand(time(0));
   std::ofstream out_file(file_name);
   for (int from = 0; from < n; from++) {
-    int x = rand() % upper_x_bound, y = rand() % upper_y_bound;
+    int x = rand() % upper_x_bound;
+    int y = rand() % upper_y_bound;
     out_file << from << " " << x << " " << y << "\n";
   }
 
@@ -224,18 +232,22 @@ void Graph::readFromFile(std::string file_name) {
 
   std::vector<std::vector<bool>> adj_matrix(size, std::vector<bool>(size, true));
 
-  for(int from = 0; from < size; from++) {
-    for (int to = 0; to < size; to++) {
-      bool connection = false;
-      in_file >> connection;
-      adj_matrix[from][to] = connection;
+  if (m_is_complete) {
+    makeGraphComplete();
+  } else {
+    for(int from = 0; from < size; from++) {
+      for (int to = 0; to < size; to++) {
+        bool connection = false;
+        in_file >> connection;
+        adj_matrix[from][to] = connection;
+      }
     }
   }
+
   connectVertices(adj_matrix);
   printf("Total vertices: %d\n", size);
   in_file.close();
 }
-
 
 void Graph::connectVertices(const std::vector<std::vector<bool>> &adj_matrix) {
   for (int from = 0, size = adj_matrix.size(); from < size; from++) {
@@ -245,23 +257,7 @@ void Graph::connectVertices(const std::vector<std::vector<bool>> &adj_matrix) {
   }
 }
 
-// Vertex Implementations
-Vertex::Vertex(const int &t_id) : id(t_id) { }
-
-void Vertex::addEdge(const Vertex &other_vertex, const int weight) {
-  out_edges[other_vertex.getID()] = weight;
-}
-
-void VertexEuclid::addEdge(const VertexEuclid &other_vertex) {
-  out_edges[other_vertex.getID()] = calculateWeight(other_vertex);
-}
-
-// VertexEuclid Emplementations
-
-int VertexEuclid::calculateWeight(const VertexEuclid &t_to) const {
-  if (id != t_to.id) {
-    return round(sqrt(pow((y - t_to.y), 2) + pow((x - t_to.x), 2)));
-  } else {
-    return 0;
-  }
+void Graph::makeGraphComplete() {
+  std::vector<std::vector<bool>> connections(size, std::vector<bool>(size, true));
+  connectVertices(connections);
 }
