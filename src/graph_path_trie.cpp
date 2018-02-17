@@ -1,4 +1,4 @@
-#include "graph_path_trie.h"
+#include "../include/graph_path_trie.h"
 
 Vertex_TrieNode::Vertex_TrieNode(Graph* t_graph,
     const VertexEuclid *t_vert_pointer, std::vector<bool> t_in_route,

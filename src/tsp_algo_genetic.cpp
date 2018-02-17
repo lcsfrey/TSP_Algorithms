@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <chrono>
 
-#include "tsp_algo_genetic.h"
+#include "../include/tsp_algo_genetic.h"
 
 class TSP_Algo_Genetic;
 using TSP_Algo_G = TSP_Algos::TSP_Algo_Genetic;

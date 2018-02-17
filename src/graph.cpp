@@ -35,7 +35,7 @@
 #include <sstream>
 #include <tuple>
 
-#include "graph.h"
+#include "../include/graph.h"
 
 // used to store edge information
 //  first int - stores the ID of the connected vertex

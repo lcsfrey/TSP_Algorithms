@@ -30,11 +30,11 @@
 #include <iostream>
 #include <ratio>
 
-#include "graph.h"
-#include "tsp_algo_nearest_neighbors.h"
-#include "tsp_algo_genetic.h"
-#include "graph_path_trie.h"
-#include "mainwindow.h"
+#include "../include/graph.h"
+#include "../include/tsp_algo_nearest_neighbors.h"
+#include "../include/tsp_algo_genetic.h"
+#include "../include/graph_path_trie.h"
+#include "../include/mainwindow.h"
 
 void printLicense();
 int displayGUI(int argc, char *argv[]);

@@ -29,9 +29,9 @@
 #include <ctime>
 #include <iostream>
 
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
-#include "tsp_algo_nearest_neighbors.h"
+#include "../include/mainwindow.h"
+#include "../include/ui_mainwindow.h"
+#include "../include/tsp_algo_nearest_neighbors.h"
 
 // initializes main window
 MainWindow::MainWindow(QWidget *parent) :
@@ -243,7 +243,7 @@ void MainWindow::drawPoints(QCustomPlot *customPlot,
 
 void MainWindow::on_button_load_vertices_clicked() {
   resetGraph(ui->customPlot);
-  std::string file_name("tsp_test_cases/" + ui->input_file->text().toStdString());
+  std::string file_name("../tsp_test_cases/" + ui->input_file->text().toStdString());
 
   if (m_graph != nullptr)
     delete m_graph;
