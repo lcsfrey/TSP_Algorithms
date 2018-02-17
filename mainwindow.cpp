@@ -290,6 +290,7 @@ void MainWindow::on_m_button_random_add_vertices_clicked() {
   for (int i = current_size; i < total; i++)
     m_graph->addVertex(i, rand() % m_max_x, rand() % m_max_y);
 
+  m_graph->makeGraphComplete();
   m_vertices = m_graph->getVertices();
   resetGraph(ui->customPlot);
   drawPoints(ui->customPlot, m_vertices);

@@ -47,6 +47,7 @@ class Graph {
   void addVertices(const std::vector<VertexEuclid> &t_vertices);
 
   void connectVertices(const std::vector<std::vector<bool> > &adj_matrix);
+  void makeGraphComplete();
 
   bool hasEdge(const int& from, const int& to) const {
     if (m_is_complete)
@@ -86,8 +87,6 @@ class Graph {
  protected:
   // loads vertices stored in file
   void readFromFile(std::string file_name);
-
-  void makeGraphComplete();
 
   std::vector<VertexEuclid> m_vertices;
   int size;

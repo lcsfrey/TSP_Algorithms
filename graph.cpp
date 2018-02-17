@@ -59,6 +59,7 @@ Graph::Graph(const std::vector<Edge> &coords, bool is_complete)
 
 void Graph::addVertex(const int &t_id) {
   m_vertices.push_back(VertexEuclid(t_id));
+  size++;
 }
 
 void Graph::addVertex(const int &t_id, const int &t_x, const int &t_y) {
@@ -260,4 +261,5 @@ void Graph::connectVertices(const std::vector<std::vector<bool>> &adj_matrix) {
 void Graph::makeGraphComplete() {
   std::vector<std::vector<bool>> connections(size, std::vector<bool>(size, true));
   connectVertices(connections);
+  m_is_complete = true;
 }

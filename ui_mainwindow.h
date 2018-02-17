@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.5.1
+** Created by: Qt User Interface Compiler version 5.10.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -325,26 +325,26 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "QCustomPlot plot examples", 0));
-        actionDraw->setText(QApplication::translate("MainWindow", "Draw", 0));
-        file_status->setText(QApplication::translate("MainWindow", "TextLabel", 0));
-        input_file->setText(QApplication::translate("MainWindow", "test-input-1.txt", 0));
-        button_load_vertices->setText(QApplication::translate("MainWindow", "Load Vertices", 0));
-        label_3->setText(QApplication::translate("MainWindow", "Total", 0));
-        m_button_random_add_vertices->setText(QApplication::translate("MainWindow", "Add Random Vertices", 0));
-        m_label_algorithm->setText(QApplication::translate("MainWindow", "No algorithm selected", 0));
-        label_2->setText(QApplication::translate("MainWindow", "Tour length: ", 0));
-        m_label_tour_length->setText(QApplication::translate("MainWindow", "0", 0));
-        m_time_taken->setText(QApplication::translate("MainWindow", "Time taken:", 0));
-        m_value_time_taken->setText(QApplication::translate("MainWindow", "0", 0));
-        label->setText(QApplication::translate("MainWindow", "Starting Index", 0));
-        button_nearest->setText(QApplication::translate("MainWindow", "Nearest Neighbors", 0));
-        button_two_opt->setText(QApplication::translate("MainWindow", "2-Opt", 0));
-        Genetic->setText(QApplication::translate("MainWindow", "Genetic", 0));
-        button_dijkstras->setText(QApplication::translate("MainWindow", "Dijkstras", 0));
-        button_prim->setText(QApplication::translate("MainWindow", "Prim MST", 0));
-        button_draw->setText(QApplication::translate("MainWindow", "Draw Lines", 0));
-        button_clear->setText(QApplication::translate("MainWindow", "Clear Lines", 0));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "QCustomPlot plot examples", nullptr));
+        actionDraw->setText(QApplication::translate("MainWindow", "Draw", nullptr));
+        file_status->setText(QApplication::translate("MainWindow", "TextLabel", nullptr));
+        input_file->setText(QApplication::translate("MainWindow", "test-input-1.txt", nullptr));
+        button_load_vertices->setText(QApplication::translate("MainWindow", "Load Vertices", nullptr));
+        label_3->setText(QApplication::translate("MainWindow", "Total", nullptr));
+        m_button_random_add_vertices->setText(QApplication::translate("MainWindow", "Add Random Vertices", nullptr));
+        m_label_algorithm->setText(QApplication::translate("MainWindow", "No algorithm selected", nullptr));
+        label_2->setText(QApplication::translate("MainWindow", "Tour length: ", nullptr));
+        m_label_tour_length->setText(QApplication::translate("MainWindow", "0", nullptr));
+        m_time_taken->setText(QApplication::translate("MainWindow", "Time taken:", nullptr));
+        m_value_time_taken->setText(QApplication::translate("MainWindow", "0", nullptr));
+        label->setText(QApplication::translate("MainWindow", "Starting Index", nullptr));
+        button_nearest->setText(QApplication::translate("MainWindow", "Nearest Neighbors", nullptr));
+        button_two_opt->setText(QApplication::translate("MainWindow", "2-Opt", nullptr));
+        Genetic->setText(QApplication::translate("MainWindow", "Genetic", nullptr));
+        button_dijkstras->setText(QApplication::translate("MainWindow", "Dijkstras", nullptr));
+        button_prim->setText(QApplication::translate("MainWindow", "Prim MST", nullptr));
+        button_draw->setText(QApplication::translate("MainWindow", "Draw Lines", nullptr));
+        button_clear->setText(QApplication::translate("MainWindow", "Clear Lines", nullptr));
     } // retranslateUi
 
 };
