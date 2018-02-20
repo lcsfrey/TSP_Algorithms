@@ -101,10 +101,9 @@ class TSP_Algo_Nearest_Neighbors {
                       const int &interval) const;
 
   const Graph* m_graph;
-  int m_route_length;
   const std::vector<VertexEuclid>* m_vertices;
-
   std::vector<int> m_simple_route;
+  int m_route_length;
 };
 
 }  // namespace TSP_Algos
