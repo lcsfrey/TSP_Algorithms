@@ -46,6 +46,7 @@ class Graph {
   void addVertex(const int &t_id, const int &t_x, const int &t_y);
   void addVertices(const std::vector<VertexEuclid> &t_vertices);
 
+  void addEdge(int from, int to, bool bidirectional = true);
   void connectVertices(const std::vector<std::vector<bool> > &adj_matrix);
   void makeGraphComplete();
 

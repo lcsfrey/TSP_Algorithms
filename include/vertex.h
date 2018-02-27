@@ -44,12 +44,18 @@ using Edge = std::pair<int,int>;
 
 class Vertex {
  public:
+  Vertex() : id(-1) {}
+  explicit Vertex(const Vertex &other) = default;
   Vertex(const int &t_id) : id(t_id) {}
+
   virtual ~Vertex() = default;
+
+  Vertex& operator=(const Vertex &other) = default;
+
+  bool operator==(const Vertex &other) const;
 
   void addEdge(const Vertex &other_vertex, const int weight = 1);
 
-  // returns the edged weight
   int getEdgeWeight(int to) const;
 
   bool hasEdge(int to) const { return out_edges.find(to) != out_edges.end(); }
@@ -57,11 +63,15 @@ class Vertex {
   const std::unordered_map<int, int>* getEdges() const { return &out_edges; }
  protected:
   std::unordered_map<int, int> out_edges;
-  const int id;
+  int id;
 };
 
 
 // Vertex Implementations
+
+inline bool Vertex::operator==(const Vertex &other) const {
+  return id == other.id && out_edges == other.out_edges;
+}
 
 inline void Vertex::addEdge(const Vertex &other_vertex, const int weight) {
   out_edges[other_vertex.getID()] = weight;
@@ -80,9 +90,18 @@ inline int Vertex::getEdgeWeight(int to) const {
 
 class VertexEuclid : public Vertex {
  public:
-  VertexEuclid(const int& t_id) : Vertex(t_id), x(0), y(0) {}
+  VertexEuclid() : Vertex(), x(0), y(0) {}
+  explicit VertexEuclid(const VertexEuclid &other) = default;
+  explicit VertexEuclid(const int& t_id) : Vertex(t_id), x(0), y(0) {}
   VertexEuclid(const int &t_id, const int &t_x, const int &t_y)
      : Vertex(t_id), x(t_x), y(t_y) { }
+
+  virtual ~VertexEuclid() = default;
+
+  VertexEuclid& operator=(const VertexEuclid &other) = default;
+
+  bool operator==(const VertexEuclid &other) const;
+
   void addEdge(const VertexEuclid &other_vertex);
 
   int getX() const { return x; }
@@ -90,14 +109,19 @@ class VertexEuclid : public Vertex {
 
 protected:
   int calculateWeight(const VertexEuclid &t_to) const;
-  const int x;
-  const int y;
+  int x;
+  int y;
 };
 
 // VertexEuclid Emplementations
 
+inline bool VertexEuclid::operator==(const VertexEuclid &other) const {
+  return id == other.id && x == other.x &&
+      y == other.y && out_edges == other.out_edges;
+}
+
 inline void VertexEuclid::addEdge(const VertexEuclid &other_vertex) {
-  out_edges[other_vertex.getID()] = calculateWeight(other_vertex);
+  out_edges[other_vertex.id] = calculateWeight(other_vertex);
 }
 
 inline int VertexEuclid::calculateWeight(const VertexEuclid &t_to) const {

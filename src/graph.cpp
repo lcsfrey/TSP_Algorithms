@@ -67,6 +67,11 @@ void Graph::addVertex(const int &t_id, const int &t_x, const int &t_y) {
   size++;
 }
 
+void Graph::addEdge(int from, int to, bool bidirectional) {
+  m_vertices[from].addEdge(m_vertices[to]);
+  if (bidirectional) m_vertices[to].addEdge(m_vertices[from]);
+}
+
 void Graph::generateRandomDirectedGraphFile(std::string &file_name, int num_vertices,
                                             int upper_x_bound, int upper_y_bound,
                                             float edge_load_factor) {
