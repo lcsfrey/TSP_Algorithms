@@ -41,8 +41,8 @@ TSP_Algo_NN::TSP_Algo_Nearest_Neighbors(Graph *t_graph)
     m_route_length(0) {}
 
 // calculates the nearest neighbor tour starting at starting_index
-void TSP_Algo_NN::findPath(int starting_index) {
-  printf("Finding nearest neighbor route...\n");
+void TSP_Algo_NN::findPath(int starting_index, bool display_status) {
+  if (display_status) printf("Finding nearest neighbor route...\n");
   auto start = std::chrono::high_resolution_clock::now();
   int size = m_vertices->size();
   int t_total_route_length = 0;
@@ -85,16 +85,17 @@ void TSP_Algo_NN::findPath(int starting_index) {
 
   auto finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = finish - start;
-  printf("Nearest Neighbor took: %f seconds\n", elapsed.count());
-  printf("Route length: %d\n----------------------------------------\n", m_route_length);
+  if (display_status) {
+    printf("Nearest Neighbor took: %f seconds\n", elapsed.count());
+    printf("Route length: %d\n----------------------------------------\n", m_route_length);
+  }
 }
 
 // calculates the 2-Optimal tour
-void TSP_Algo_NN::twoOpt() {
-  printf("Finding 2-optimal route...\n");
+void TSP_Algo_NN::twoOpt(bool display_status) {
+  if (display_status) printf("Finding 2-optimal route...\n");
   auto start = std::chrono::high_resolution_clock::now();
   auto finish = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> time_overall;
   std::chrono::duration<double> elapsed;
 
   int old_length = m_route_length;
@@ -109,7 +110,7 @@ void TSP_Algo_NN::twoOpt() {
     std::vector<std::tuple<int, int, int>> change_list{std::tuple<int, int, int>(0, -1, -1)};
     old_length = current_length;
 
-    findBestChange(current_route, change_list, 0, 0, size, size - 2);
+    findBestChange(current_route, change_list, 0, 0, size - 2);
     // reverse order of route between two indices if an improvement is found
     if (std::get<0>(change_list.front()) != 0) {
       current_length += std::get<0>(change_list.front());
@@ -119,10 +120,9 @@ void TSP_Algo_NN::twoOpt() {
       std::reverse(current_route.begin() + min_i, t_end);
     }
 
-    iterations++;
     // report time and length of every 25th iteration
     finish = std::chrono::high_resolution_clock::now();
-    if (iterations % 25 == 0) {
+    if (display_status && ++iterations % 25 == 0) {
       elapsed = finish - start;
       printf("%d iterations took: %f seconds\n", iterations, elapsed.count());
       printf("Current route length: %d\n", current_length);
@@ -136,13 +136,15 @@ void TSP_Algo_NN::twoOpt() {
 
   finish = std::chrono::high_resolution_clock::now();
   elapsed = finish - start;
-  printf("2-optimal took: %f seconds\n", elapsed.count());
-  printf("Final length: %d\n", m_route_length);
-  printf("----------------------------------------\n");
+  if (display_status) {
+    printf("2-optimal took: %f seconds\n", elapsed.count());
+    printf("Final length: %d\n", m_route_length);
+    printf("----------------------------------------\n");
+  }
 }
 
-void TSP_Algo_NN::threadedTwoOpt() {
-  printf("Finding 2-optimal route...\n");
+void TSP_Algo_NN::threadedTwoOpt(bool display_status) {
+  if (display_status) printf("Finding 2-optimal route...\n");
   auto start = std::chrono::high_resolution_clock::now();
   auto finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed;
@@ -162,25 +164,18 @@ void TSP_Algo_NN::threadedTwoOpt() {
     std::vector<std::tuple<int, int, int>> change_list(4, std::tuple<int, int, int>(0, -1, -1));
     old_length = current_length;
 
-    // start thread 1 to calculate the best improvement within the first quarter of the route
-    std::thread t1(&TSP_Algo_NN::findBestChange, this, current_route,
-                   std::ref(change_list), 0, 0, size, interval);
+    std::vector<std::thread*> pool;
+    for (int i = 0, start_index = 0; i < 4; i++, start_index+=interval) {
+      // start thread to calculate the best change where one edge comes from
+      // anywhere in the path and the second edge comes from the ith interval
+      // starting at start_index
+      pool.push_back(new std::thread(&TSP_Algo_NN::findBestChange, this, current_route,
+                                     std::ref(change_list), i, start_index,
+                                     start_index+interval));
+    }
 
-    // start thread 2 to calculate the best improvement within the second quarter of the route
-    std::thread t2(&TSP_Algo_NN::findBestChange, this, current_route,
-                   std::ref(change_list), 1, interval, size, 2*interval);
+    for (int i = 0; i < 4; i++) pool[i]->join();
 
-    // start thread 3 to calculate the best improvement within the third quarter of the route
-    std::thread t3(&TSP_Algo_NN::findBestChange, this, current_route,
-                   std::ref(change_list), 2, 2*interval, size, 3*interval);
-
-    // start thread 4 to calculate the best improvement within the fourth quarter of the route
-    std::thread t4(&TSP_Algo_NN::findBestChange, this, current_route,
-             std::ref(change_list), 3, 3*interval, size, size-2);
-    t1.join();
-    t2.join();
-    t3.join();
-    t4.join();
     // determine the best improvement (the smallest min_change)
     for (int i = 0; i < 4; i++) {
       if (std::get<0>(change_list.at(i)) < min_change) {
@@ -197,10 +192,9 @@ void TSP_Algo_NN::threadedTwoOpt() {
       std::reverse(current_route.begin() + min_i, t_end);
     }
 
-    iterations++;
     // report time and length of every 25th iteration
     finish = std::chrono::high_resolution_clock::now();
-    if (iterations % 25 == 0) {
+    if (display_status && ++iterations % 25 == 0) {
       elapsed = finish - start;
       printf("%d iterations took: %f seconds\n", iterations, elapsed.count());
       printf("Current route length: %d\n", current_length);
@@ -214,25 +208,28 @@ void TSP_Algo_NN::threadedTwoOpt() {
 
   finish = std::chrono::high_resolution_clock::now();
   elapsed = finish - start;
-  printf("2-optimal took: %f seconds\n", elapsed.count());
-  printf("Final length: %d\n", m_route_length);
-  printf("----------------------------------------\n");
+  if (display_status) {
+    printf("2-optimal took: %f seconds\n", elapsed.count());
+    printf("Final length: %d\n", m_route_length);
+    printf("----------------------------------------\n");
+  }
 }
 
 //
 void TSP_Algo_NN::findBestChange(const std::vector<int> &current_route,
                                  std::vector<std::tuple<int, int, int>> &change_list,
-                                 const int &list_position,
-                                 const int &starting_index,
-                                 const int &size,
-                                 const int &interval) const {
+                                 int list_position,
+                                 int starting_index,
+                                 int interval) const {
   int min_k = -1;
   int min_i = -1;
-  int change = 0;
   int min_change = 0;
+  int size = current_route.size();
+  if (interval > size - 2) interval = size - 2;
+
   for (int i = starting_index; i < interval; i++) {
     for (int k = i+2; k < size; k++) {
-      change = calcChangeOfEdges(current_route, i, k, size);
+      int change = calcChangeOfEdges(current_route, i, k, size);
       // check if the weight of the new edges is less than the weight of
       // the best improvement found so far
       if (change < min_change) {

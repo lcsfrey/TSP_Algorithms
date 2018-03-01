@@ -58,16 +58,16 @@ class TSP_Algo_Nearest_Neighbors {
   explicit TSP_Algo_Nearest_Neighbors(Graph* t_graph);
 
   // calculates the nearest neighbor tour starting at starting_index
-  void findPath(int starting_index = 0);
+  void findPath(int starting_index = 0, bool display_status = true);
 
   // calculates the 2-optimal tour
   // m_simple_tour must already have an initial route
-  void twoOpt();
+  void twoOpt(bool display_status = true);
 
   // calculates the 2-optimal tour
   // m_simple_tour must already have an initial route
   // work done by method is divided between four threads
-  void threadedTwoOpt();
+  void threadedTwoOpt(bool display_status = true);
 
   // returns current route
   inline std::vector<int> getRoute() const { return m_simple_route; }
@@ -95,10 +95,9 @@ class TSP_Algo_Nearest_Neighbors {
   // in current_route that will be manipulated by twoOpt and threadedTwoOpt.
   void findBestChange(const std::vector<int> &current_route,
                       std::vector<std::tuple<int, int, int> > &change_list,
-                      const int &list_position,
-                      const int &starting_index,
-                      const int &size,
-                      const int &interval) const;
+                      int list_position,
+                      int starting_index,
+                      int interval) const;
 
   const Graph* m_graph;
   const std::vector<VertexEuclid>* m_vertices;
