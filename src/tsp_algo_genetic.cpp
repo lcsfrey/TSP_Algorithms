@@ -5,25 +5,19 @@
 
 #include "../include/tsp_algo_genetic.h"
 
-class TSP_Algo_Genetic;
 using TSP_Algo_G = TSP_Algos::TSP_Algo_Genetic;
 
 // used to access current time
 using Time = std::chrono::high_resolution_clock;
 
 TSP_Algo_G::TSP_Algo_Genetic(Graph *t_graph, int population_size)
-    : m_graph(t_graph), m_vertices(t_graph->getVertices()) {
-
+    : m_graph(t_graph), m_population_size(population_size),
+      m_best_fitness(INT32_MAX), m_last_fitness(0),
+      m_mutation_probability(.25), m_generation_count(0) {
   srand(time(0));
-  m_generation_count = 0;
-  m_best_fitness = INT32_MAX;
-  m_last_fitness = 0;
-  m_mutation_probability = .25;
-  m_population_size = population_size;
-  ChromosomeHeap temp_heap;
 
   // creates random Chromosomes and stores the best Chromosomes in min heap
-  std::vector<int> t_route(m_vertices->size());
+  std::vector<int> t_route(m_graph->getNumVertices());
   std::iota(t_route.begin(), t_route.end(), 0);
   for(int i = 0; i < m_population_size; i++) {
     std::shuffle(t_route.begin(), t_route.end(), std::mt19937{std::random_device{}()});
@@ -39,7 +33,7 @@ void TSP_Algo_G::changePopulationSize(int population_size) {
       temp_heap.push(candidate);
       m_chromosome_heap.pop();
     } else {
-      std::vector<int> t_route(m_vertices->size());
+      std::vector<int> t_route(m_graph->getNumVertices());
       std::iota(t_route.begin(), t_route.end(), 0);
       std::shuffle(t_route.begin(), t_route.end(), std::mt19937{std::random_device{}()});
       temp_heap.push(Chromosome(m_graph, t_route));
@@ -100,10 +94,10 @@ void TSP_Algo_G::tick(){
     }
     children--;
   }
-  m_chromosome_heap = temp_chromosome_heap;
+  m_chromosome_heap = std::move(temp_chromosome_heap);
 
   int current_fitness = m_chromosome_heap.top().m_route_fitness;
-  if (m_best_fitness >= current_fitness) {
+  if (m_best_fitness <= current_fitness) {
     if (m_mutation_probability < .75) {
       m_mutation_probability += .001;
     }
@@ -120,23 +114,25 @@ void TSP_Algo_G::tick(){
 
 void TSP_Algo_G::run(const int &num_generations, bool display_status) {
   Time::time_point start_time = Time::now();
+  if (display_status) printStatus(start_time);
   for (int i = 0; i < num_generations; i++) {
-    if (display_status && i % 25 == 0) printStatus(start_time);
     tick();
+    if (display_status && m_generation_count % 10 == 0) printStatus(start_time);
   }
 }
 
 TSP_Algo_G::Chromosome TSP_Algo_G::reproduce(
     const TSP_Algo_G::Chromosome &parent_1,
     const TSP_Algo_G::Chromosome &parent_2) const {
-  int size = m_vertices->size();
+  int size = m_graph->getNumVertices();
   int size_from_parent_1 = rand() % size;
   int offset_from_parent_1 = rand() % (size - size_from_parent_1);
   std::vector<int> t_child(parent_1.m_route.size());
   std::vector<bool> in_path(size, false);
   int index = 0;
+  int last_index_of_parent_1 = size_from_parent_1 + offset_from_parent_1;
   // pick a random sequence of vertices from parent_1 and add that sequence to the child route
-  for (int i = offset_from_parent_1; i < size_from_parent_1 + offset_from_parent_1; i++) {
+  for (int i = offset_from_parent_1; i < last_index_of_parent_1; i++) {
     t_child[index++] = parent_1.m_route[i];
     in_path[parent_1.m_route[i]] = true;
   }
@@ -152,8 +148,7 @@ TSP_Algo_G::Chromosome TSP_Algo_G::reproduce(
   return child_chromosome;
 }
 
-TSP_Algo_G::Chromosome::Chromosome(const Graph *graph,
-    const std::vector<int> &route)
+TSP_Algo_G::Chromosome::Chromosome(const Graph *graph, const std::vector<int> &route)
     : m_route(route), m_route_fitness(graph->calcPathLength(m_route)) {}
 
 void TSP_Algo_G::Chromosome::mutate(double probability) {
@@ -194,13 +189,16 @@ void TSP_Algos::TSP_Algo_Genetic_Threaded::tick() {
     m_populations[i]->tick();
 }
 
-void TSP_Algos::TSP_Algo_Genetic_Threaded::run(const int &num_generations) {
+void TSP_Algos::TSP_Algo_Genetic_Threaded::run(const int &num_generations, bool display_status) {
   Time::time_point start_time = Time::now();
   std::vector<std::thread> threads(m_thread_count);
 
+  bool display = display_status;
   // initialize all threads in thread pool
   for (int i = 0; i < m_thread_count; i++) {
-    threads[i] = std::thread(&TSP_Algo_Genetic::run, m_populations[i], num_generations, false);
+    threads[i] = std::thread(&TSP_Algo_Genetic::run, m_populations[i],
+                             num_generations, display);
+    display = false;
   }
 
   for (std::thread &current_thread : threads) current_thread.join();
@@ -210,7 +208,7 @@ void TSP_Algos::TSP_Algo_Genetic_Threaded::run(const int &num_generations) {
     if (m_populations[i]->getCurrentFitness() < m_best_fitness) {
       m_best_fitness = m_populations[i]->getCurrentFitness();
     }
-    m_populations[i]->printStatus(start_time);
+    if (display_status) m_populations[i]->printStatus(start_time);
   }
 }
 

@@ -45,8 +45,8 @@ class TSP_Algo_Genetic {
   // stores independent TSP route and fitness
   struct Chromosome {
     // Chromosome variables
-    int m_route_fitness;
     std::vector<int> m_route;
+    int m_route_fitness;
 
     // constructs Chromosome using route
     Chromosome(const Graph* graph, const std::vector<int> &route);
@@ -62,8 +62,8 @@ class TSP_Algo_Genetic {
   // min heap used to store Chromosomes where the top of the heap is the
   // Chromosome that is storing the best route and smallest route length.
   typedef std::priority_queue<Chromosome,
-                std::vector<Chromosome>,
-                std::greater<Chromosome>> ChromosomeHeap;
+                              std::vector<Chromosome>,
+                              std::greater<Chromosome>> ChromosomeHeap;
 
   // returns the child Chromosome of two parent chromosomes
   // input parent_1 gives child random subroute
@@ -103,14 +103,17 @@ class TSP_Algo_Genetic {
   friend class TSP_Algo_Genetic_Threaded;
 
  protected:
+  // pointer to graph the algorithm works on
+  const Graph* m_graph;
+
+  // size of the chromosome heap
+  int m_population_size;
+
   // fitness of the current generation
   int m_best_fitness;
 
   // fitness of the last generation
   int m_last_fitness;
-
-  // size of the chromosome heap
-  int m_population_size;
 
   // starting probability that a new generation will mutate (swap vertices)
   double m_mutation_probability;
@@ -121,12 +124,6 @@ class TSP_Algo_Genetic {
   // min heap of route chromosomes with the fittest chromosome (the shortest
   // length route) at the top
   ChromosomeHeap m_chromosome_heap;
-
-  // pointer to graph the algorithm works on
-  const Graph* m_graph;
-
-  // stores vertices of graph
-  const std::vector<VertexEuclid>* m_vertices;
 };
 
 class TSP_Algo_Genetic_Threaded {
@@ -143,7 +140,7 @@ class TSP_Algo_Genetic_Threaded {
   void tick();
 
   // create four threads running their own genetic algorithm
-  void run(const int &num_generations = 5000);
+  void run(const int &num_generations = 5000, bool display_status = true);
 
   // changes the number of Chromosomes stored in m_chromosome_heap
   void changePopulationSize(int population_size);
