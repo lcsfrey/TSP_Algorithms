@@ -210,12 +210,12 @@ void MainWindow::drawTourLines(QCustomPlot* customPlot,
 void MainWindow::drawPrimLines(QCustomPlot *customPlot,
            const std::vector<VertexEuclid>* vertices,
            const std::vector<int> &connections) {
-  for (auto VertexEuclid : *vertices) {
-    int parent_x = vertices->at(connections[VertexEuclid.getID()]).getX();
-    int parent_y = vertices->at(connections[VertexEuclid.getID()]).getY();
+  for (const VertexEuclid &vertex : *vertices) {
+    int parent_x = vertices->at(connections[vertex.getID()]).getX();
+    int parent_y = vertices->at(connections[vertex.getID()]).getY();
 
-    int child_x = VertexEuclid.getX();
-    int child_y = VertexEuclid.getY();
+    int child_x = vertex.getX();
+    int child_y = vertex.getY();
     QCPItemLine *line = new QCPItemLine(customPlot);
     line->setPen(QPen(Qt::blue));
     line->start->setCoords(parent_x, parent_y + 20);
@@ -227,16 +227,16 @@ void MainWindow::drawPoints(QCustomPlot *customPlot,
               const std::vector<VertexEuclid>* vertices) {
   if (vertices == nullptr) return;
 
-  for (VertexEuclid VertexEuclid : *vertices) {
-    int x = VertexEuclid.getX();
-    int y = VertexEuclid.getY();
+  for (const VertexEuclid &vertex : *vertices) {
+    int x = vertex.getX();
+    int y = vertex.getY();
     customPlot->graph(0)->addData(x, y);
     QCPItemText *text = new QCPItemText(customPlot);
     text->setColor(Qt::red);
     QFont font;
     font.setPointSize(8);
     text->setFont(font);
-    text->setText(QString::number(VertexEuclid.getID()));
+    text->setText(QString::number(vertex.getID()));
     text->position->setCoords(x,  y);
   }
 }
@@ -253,9 +253,9 @@ void MainWindow::on_button_load_vertices_clicked() {
 
   m_max_x = 0;
   m_max_y = 0;
-  for (auto VertexEuclid : *m_vertices) {
-    int x = VertexEuclid.getX();
-    int y = VertexEuclid.getY();
+  for (const VertexEuclid &vertex : *m_vertices) {
+    int x = vertex.getX();
+    int y = vertex.getY();
     if (m_max_x < x)
       m_max_x = x;
     if (m_max_y < y)
