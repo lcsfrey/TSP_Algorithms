@@ -46,7 +46,7 @@ class Vertex {
  public:
   Vertex() : id(-1) {}
   explicit Vertex(const Vertex &other) = default;
-  Vertex(const int &t_id) : id(t_id) {}
+  Vertex(const int t_id) : id(t_id) {}
 
   virtual ~Vertex() = default;
 
@@ -92,8 +92,8 @@ class VertexEuclid : public Vertex {
  public:
   VertexEuclid() : Vertex(), x(0), y(0) {}
   explicit VertexEuclid(const VertexEuclid &other) = default;
-  explicit VertexEuclid(const int& t_id) : Vertex(t_id), x(0), y(0) {}
-  VertexEuclid(const int &t_id, const int &t_x, const int &t_y)
+  explicit VertexEuclid(const int t_id) : Vertex(t_id), x(0), y(0) {}
+  VertexEuclid(const int t_id, const int t_x, const int t_y)
      : Vertex(t_id), x(t_x), y(t_y) { }
 
   virtual ~VertexEuclid() = default;

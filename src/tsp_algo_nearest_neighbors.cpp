@@ -249,12 +249,11 @@ void TSP_Algo_NN::findBestChange(const std::vector<int> &current_route,
 // first pair of edges connect i to i+1 and k to k+1 in the route
 // second pair of edges connect i to k and i+1 to k+1 in the route
 int TSP_Algo_NN::calcChangeOfEdges(const std::vector<int> &current_route,
-                                   const int &i, const int &k,
-                                   const int &size) const {
+                                   const int i, const int k, const int size) const {
 
   int old_edge_1_weight = m_graph->getEdgeWeight(current_route[i], current_route[i+1]);
-  int new_edge_1_weight = m_graph->getEdgeWeight(current_route[i], current_route[k]);
   int old_edge_2_weight = 0;
+  int new_edge_1_weight = m_graph->getEdgeWeight(current_route[i], current_route[k]);
   int new_edge_2_weight = 0;
   if (k < size - 1) {
     old_edge_2_weight = m_graph->getEdgeWeight(current_route[k], current_route[k+1]);
