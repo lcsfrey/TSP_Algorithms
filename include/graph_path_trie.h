@@ -44,7 +44,7 @@ class Vertex_TrieNode {
   //  t_length : length of tour if it ended here
  public:
   Vertex_TrieNode(Graph* t_graph, const VertexEuclid *t_vert_pointer,
-                  std::vector<bool> t_in_route, const int& size, int t_length);
+                  std::vector<bool> t_in_route, const int size, int t_length);
 
   // member variables:
   //   m_ver_pointer : pointer to vertex that was visited by creating this node

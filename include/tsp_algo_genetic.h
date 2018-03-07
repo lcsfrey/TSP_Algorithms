@@ -82,7 +82,7 @@ class TSP_Algo_Genetic {
   void tick();
 
   // calls the tick method a number of times equal to num_generations
-  void run(const int &num_generations = 5000, bool display_status = true);
+  void run(const int num_generations = 5000, bool display_status = true);
 
   // returns the current best route
   std::vector<int> getRoute() const;
@@ -140,7 +140,7 @@ class TSP_Algo_Genetic_Threaded {
   void tick();
 
   // create four threads running their own genetic algorithm
-  void run(const int &num_generations = 5000, bool display_status = true);
+  void run(const int num_generations = 5000, bool display_status = true);
 
   // changes the number of Chromosomes stored in m_chromosome_heap
   void changePopulationSize(int population_size);

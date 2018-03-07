@@ -2,7 +2,7 @@
 
 Vertex_TrieNode::Vertex_TrieNode(Graph* t_graph,
     const VertexEuclid *t_vert_pointer, std::vector<bool> t_in_route,
-    const int& size, int t_length) {
+    const int size, int t_length) {
 
   m_in_route = t_in_route;
   m_length_so_far = t_length;

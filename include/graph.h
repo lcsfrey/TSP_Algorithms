@@ -38,24 +38,20 @@ class Graph {
  public:
   Graph();
   explicit Graph(std::string file_name, bool is_complete = true);
-  explicit Graph(const std::vector<std::pair<int,int>> &coords, bool is_complete = true);
+  explicit Graph(const std::vector<std::pair<int,int>> &coords,
+                 bool is_complete = true);
 
   ~Graph() {}
 
-  void addVertex(const int &t_id);
-  void addVertex(const int &t_id, const int &t_x, const int &t_y);
+  void addVertex(const int t_id);
+  void addVertex(const int t_id, const int t_x, const int t_y);
   void addVertices(const std::vector<VertexEuclid> &t_vertices);
 
-  void addEdge(int from, int to, bool bidirectional = true);
-  void connectVertices(const std::vector<std::vector<bool> > &adj_matrix);
+  void addEdge(const int from, const int to, bool bidirectional = true);
+  void connectVertices(const std::vector<std::vector<bool>> &adj_matrix);
   void makeGraphComplete();
 
-  bool hasEdge(const int& from, const int& to) const {
-    if (m_is_complete)
-      return true;
-    else
-      return getVertex(from)->hasEdge(to);
-  }
+  bool hasEdge(const int from, const int to) const;
 
   void generateRandomDirectedGraphFile(std::string &file_name, int num_vertices,
                                        int upper_x_bound, int upper_y_bound,
@@ -64,18 +60,15 @@ class Graph {
   void generateRandomCompleteGraphFile(std::string &file_name, int num_vertices,
                                        int upper_x_bound, int upper_y_bound);
 
-  // returns const pointer to vertex if id is a valid size or nullptr if not
-  const VertexEuclid* getVertex(const int& id) const {
-    return 0 <= id && id < size ? &m_vertices.at(id) : nullptr;
-  }
+  // returns const pointer to vertex if id corresponds to
+  // a vertex id, or nullptr if the vertex doesn't exist
+  const VertexEuclid* getVertex(const int id) const;
 
   // returns const pointer to the vector m_vertices
   const std::vector<VertexEuclid> *getVertices() const;
 
   // returns edge weight if edge exists, or INT32_MAX if edge does not exist
-  int getEdgeWeight(const int& from, const int& to) const {
-    return hasEdge(from, to) ? getVertex(from)->getEdgeWeight(to) : INT32_MAX;
-  }
+  int getEdgeWeight(const int from, const int to) const;
 
   int getNumVertices() const { return size; }
 
@@ -93,6 +86,18 @@ class Graph {
   int size;
   bool m_is_complete;
 };
+
+inline bool Graph::hasEdge(const int from, const int to) const {
+  return m_is_complete ? true : getVertex(from)->hasEdge(to);
+}
+
+inline const VertexEuclid *Graph::getVertex(const int id) const {
+  return 0 <= id && id < size ? &m_vertices.at(id) : nullptr;
+}
+
+inline int Graph::getEdgeWeight(const int from, const int to) const {
+  return hasEdge(from, to) ? getVertex(from)->getEdgeWeight(to) : INT32_MAX;
+}
 
 inline int Graph::calcPathLength(const std::vector<int> &t_route) const {
   int t_total_length = getEdgeWeight(t_route[0], t_route[1]);
