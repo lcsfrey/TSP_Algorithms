@@ -48,36 +48,47 @@ int main(int argc, char *argv[]) {
 }
 
 int menuMain(int argc, char *argv[]) {
-  Graph* my_graph = new Graph("tsp_test_cases/test-input-3.txt");
+  std::string filename = "tsp_test_cases/test-input-1.txt";
+  if (argc == 2) filename = argv[1];
+  Graph* my_graph = new Graph(filename);
+
   TSP_Algos::TSP_Algo_Nearest_Neighbors algo_nn(my_graph);
   int choice = -1;
   while (choice != 0) {
     std::cout << "--------------------------------------------------------------------------------\n"
        << "Select method:\n"
        << "0 - Exit\n"
-       << "1 - Nearest Neighbor\n"
-       << "2 - Two Optimal\n"
-       << "3 - Threaded Two Optimal\n"
-       << "4 - Genetic\n"
-       << "5 - Threaded Genetic\n"
-       << "6 - Launch GUI\n"
+       << "1 - Load Graph\n"
+       << "2 - Nearest Neighbor\n"
+       << "3 - Two Optimal\n"
+       << "4 - Threaded Two Optimal\n"
+       << "5 - Genetic\n"
+       << "6 - Threaded Genetic\n"
+       << "7 - Launch GUI\n"
        << "\n";
     std::cin >> choice;
     std::cout << endl;
     switch (choice) {
       case 0: break;
-      case 1: algo_nn.findPath(); break;
-      case 2:
+      case 1:
+        delete my_graph;
+        std::cout << "Enter fillname to load:\ntsp_test_cases/";
+        std::cin >> filename;
+        filename = "tsp_test_cases/" + filename;
+        my_graph = new Graph(filename);
+        break;
+      case 2: algo_nn.findPath(); break;
+      case 3:
         algo_nn.findPath();
         algo_nn.twoOpt();
         break;
-      case 3:
+      case 4:
         algo_nn.findPath();
         algo_nn.threadedTwoOpt();
         break;
-      case 4: menuGenetic(my_graph); break;
-      case 5: menuGenetic(my_graph, true); break;
-      case 6: return displayGUI(argc, argv); break;
+      case 5: menuGenetic(my_graph); break;
+      case 6: menuGenetic(my_graph, true); break;
+      case 7: return displayGUI(argc, argv); break;
       default: std::cout << "Invalid choice!\n"; break;
     }
   }

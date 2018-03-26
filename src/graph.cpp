@@ -57,24 +57,27 @@ Graph::Graph(const std::vector<Edge> &coords, bool is_complete)
     addVertex(i, coords[i].first, coords[i].second);
 }
 
-void Graph::addVertex(const int &t_id) {
+void Graph::addVertex(const int t_id) {
   m_vertices.push_back(VertexEuclid(t_id));
   size++;
 }
 
-void Graph::addVertex(const int &t_id, const int &t_x, const int &t_y) {
+void Graph::addVertex(const int t_id, const int t_x, const int t_y) {
   m_vertices.push_back(VertexEuclid(t_id, t_x, t_y));
   size++;
 }
 
-void Graph::addEdge(int from, int to, bool bidirectional) {
+void Graph::addEdge(const int from, const int to, bool bidirectional) {
   m_vertices[from].addEdge(m_vertices[to]);
   if (bidirectional) m_vertices[to].addEdge(m_vertices[from]);
 }
 
-void Graph::generateRandomDirectedGraphFile(std::string &file_name, int num_vertices,
-                                            int upper_x_bound, int upper_y_bound,
-                                            float edge_load_factor) {
+void Graph::generateRandomDirectedGraphFile(
+    std::string &file_name,
+    int num_vertices,
+    int upper_x_bound,
+    int upper_y_bound,
+    float edge_load_factor) {
   srand(time(0));
   std::ofstream out_file(file_name);
   for (int from = 0; from < num_vertices; from++) {
@@ -98,11 +101,14 @@ void Graph::generateRandomDirectedGraphFile(std::string &file_name, int num_vert
   out_file.close();
 }
 
-void Graph::generateRandomCompleteGraphFile(std::string &file_name, int n,
-                                            int upper_x_bound, int upper_y_bound) {
+void Graph::generateRandomCompleteGraphFile(
+    std::string &file_name,
+    int num_vertices,
+    int upper_x_bound,
+    int upper_y_bound) {
   srand(time(0));
   std::ofstream out_file(file_name);
-  for (int from = 0; from < n; from++) {
+  for (int from = 0; from < num_vertices; from++) {
     int x = rand() % upper_x_bound;
     int y = rand() % upper_y_bound;
     out_file << from << " " << x << " " << y << "\n";
@@ -110,8 +116,8 @@ void Graph::generateRandomCompleteGraphFile(std::string &file_name, int n,
 
   out_file << "\n";
 
-  for (int from = 0; from < n; from++) {
-    for (int to = 0; to < n; to++) {
+  for (int from = 0; from < num_vertices; from++) {
+    for (int to = 0; to < num_vertices; to++) {
       if (from != to)
         out_file << "1 ";
       else
@@ -264,7 +270,7 @@ void Graph::connectVertices(const std::vector<std::vector<bool>> &adj_matrix) {
 }
 
 void Graph::makeGraphComplete() {
-  std::vector<std::vector<bool>> connections(size, std::vector<bool>(size, true));
-  connectVertices(connections);
-  m_is_complete = true;
+  for (int from = 0; from < size; from++)
+    for (int to = 0; to < size; to++)
+      m_vertices[from].addEdge(m_vertices[to]);
 }

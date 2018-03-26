@@ -112,7 +112,7 @@ void TSP_Algo_G::tick(){
   m_generation_count++;
 }
 
-void TSP_Algo_G::run(const int &num_generations, bool display_status) {
+void TSP_Algo_G::run(int num_generations, bool display_status) {
   Time::time_point start_time = Time::now();
   if (display_status) printStatus(start_time);
   for (int i = 0; i < num_generations; i++) {
@@ -189,7 +189,7 @@ void TSP_Algos::TSP_Algo_Genetic_Threaded::tick() {
     m_populations[i]->tick();
 }
 
-void TSP_Algos::TSP_Algo_Genetic_Threaded::run(const int &num_generations, bool display_status) {
+void TSP_Algos::TSP_Algo_Genetic_Threaded::run(const int num_generations, bool display_status) {
   Time::time_point start_time = Time::now();
   std::vector<std::thread> threads(m_thread_count);
 
@@ -203,7 +203,7 @@ void TSP_Algos::TSP_Algo_Genetic_Threaded::run(const int &num_generations, bool 
 
   for (std::thread &current_thread : threads) current_thread.join();
 
-  // determine the shortest route length
+  // determine the shortest route length between all the populations
   for (int i = 0; i < m_thread_count; i++) {
     if (m_populations[i]->getCurrentFitness() < m_best_fitness) {
       m_best_fitness = m_populations[i]->getCurrentFitness();

@@ -86,7 +86,7 @@ class TSP_Algo_Nearest_Neighbors {
   // first pair of edges connect i to i+1 and k to k+1 in the route
   // second pair of edges connect i to k and i+1 to k+1 in the route
   int calcChangeOfEdges(const std::vector<int> &current_route,
-                        const int &i, const int &k, const int &size) const;
+                        const int i, const int k, const int size) const;
 
   // findBestChange is used by twoOpt and threadedTwoOpt methods to find the best
   // improvement over an interval. The result is stored as a tuple in
